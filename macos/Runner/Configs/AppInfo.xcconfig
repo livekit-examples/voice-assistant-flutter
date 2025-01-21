@@ -8,7 +8,7 @@
 PRODUCT_NAME = voice_assistant
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.voiceAssistant
+PRODUCT_BUNDLE_IDENTIFIER = com.livekit.example.VoiceAssistantFlutter
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2025 com.example. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2025 LiveKit. All rights reserved.
