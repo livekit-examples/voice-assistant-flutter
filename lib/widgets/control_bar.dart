@@ -171,18 +171,19 @@ class ConnectButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
+    return TextButton(
       onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
+      style: TextButton.styleFrom(
         backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
         foregroundColor: Theme.of(context).colorScheme.primary,
-      ),
-      child: const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Text(
-          'START CONVERSATION',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
         ),
+      ),
+      child: Text(
+        'Start a Conversation'.toUpperCase(),
+        style: const TextStyle(fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -215,18 +216,19 @@ class TransitionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
+    return TextButton(
       onPressed: null, // Disabled during transition
-      style: ElevatedButton.styleFrom(
+      style: TextButton.styleFrom(
         backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-        foregroundColor: Theme.of(context).colorScheme.secondary,
-      ),
-      child: Padding(
+        foregroundColor: Theme.of(context).colorScheme.primary,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Text(
-          isConnecting ? 'CONNECTING...' : 'DISCONNECTING...',
-          style: const TextStyle(fontWeight: FontWeight.bold),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
         ),
+      ),
+      child: Text(
+        (isConnecting ? 'Connecting…' : 'Disconnecting…').toUpperCase(),
+        style: const TextStyle(fontWeight: FontWeight.bold),
       ),
     );
   }

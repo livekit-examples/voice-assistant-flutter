@@ -65,13 +65,16 @@ class _VoiceAssistantState extends State<VoiceAssistant> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              spacing: 24,
               children: [
-                SizedBox(
-                  height: 256,
-                  width: 512,
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: 512,
+                    minHeight: 256,
+                    maxHeight: 256,
+                  ),
                   child: StatusWidget(),
                 ),
-                const SizedBox(height: 24),
                 ControlBar(),
               ],
             ),
