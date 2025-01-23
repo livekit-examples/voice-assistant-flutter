@@ -118,51 +118,6 @@ class _ControlBarState extends State<ControlBar> {
     );
   }
 }
-
-// /// Displays real-time audio levels for the local participant
-// class LocalAudioVisualizer extends StatefulWidget {
-//   final AudioTrack? track;
-
-//   const LocalAudioVisualizer({super.key, this.track});
-
-//   @override
-//   State<LocalAudioVisualizer> createState() => _LocalAudioVisualizerState();
-// }
-
-// class _LocalAudioVisualizerState extends State<LocalAudioVisualizer> {
-//   late AudioProcessor audioProcessor;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     audioProcessor = AudioProcessor(
-//       track: widget.track,
-//       bandCount: 9,
-//       isCentered: false);
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return HStack(
-//       spacing: 3,
-//       children: [
-//         for (int index = 0; index < 9; index++)
-//           Rectangle(
-//             fill: Color.primary,
-//             frame: Rect(0, 0, 2, double.infinity),
-//             alignment: Alignment.center,
-//             scale: Scale(
-//               x: 1,
-//               y: max(0.05, audioProcessor.bands[index]),
-//               anchor: Anchor(x: 0.5, y: 0.5),
-//             ),
-//           ),
-//       ],
-//       padding: EdgeInsets(vertical: 8, leading: 0, trailing: 8),
-//     );
-//   }
-// }
-
 /// Button shown when disconnected to start a new conversation
 class ConnectButton extends StatelessWidget {
   final VoidCallback onPressed;
@@ -234,6 +189,98 @@ class TransitionButton extends StatelessWidget {
   }
 }
 
+/// Audio visualizer that displays thin bars that scale from the center
+class LocalAudioVisualizer extends StatefulWidget {
+  final AudioTrack? audioTrack;
+  final Color color;
+  
+  const LocalAudioVisualizer({
+    super.key,
+    required this.audioTrack,
+    this.color = Colors.white,
+  });
+
+  @override
+  State<LocalAudioVisualizer> createState() => _LocalAudioVisualizerState();
+}
+
+class _LocalAudioVisualizerState extends State<LocalAudioVisualizer> {
+  static const int sampleCount = 7;
+  List<double> samples = List.filled(sampleCount, 0.05); // Minimum scale of 0.05
+  EventsListener<TrackEvent>? _listener;
+
+  void _startVisualizer(AudioTrack? track) {
+    _listener = track?.createListener();
+    _listener
+      ?..on<AudioVisualizerEvent>((e) {
+        if (mounted) {
+          setState(() {
+            // Safely process incoming audio data
+            samples = e.event
+                .take(sampleCount)
+                .map((e) => ((e as num).toDouble() * 2).clamp(0.05, 1.0))  // Adjust scaling factor
+                .toList();
+            // Ensure we always have 7 samples
+            while (samples.length < sampleCount){
+              samples.add(0.05);
+            }
+          });
+        }
+      })
+      ..on<TrackMutedEvent>((e) {
+        if (mounted) {
+          setState(() {
+            samples = List.filled(sampleCount, 0.05);
+          });
+        }
+      });
+  }
+
+  void _stopVisualizer() {
+    _listener?.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _startVisualizer(widget.audioTrack);
+  }
+
+  @override
+  void dispose() {
+    _stopVisualizer();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(  // Add a SizedBox to constrain the size
+      height: 44,     // Provide a reasonable height
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(
+            sampleCount,
+            (index) => Padding(
+              padding: EdgeInsets.only(right: index < sampleCount - 1 ? 3 : 8),
+              child: Transform.scale(
+                scaleY: index < samples.length ? samples[index] : 0.05,  // Safely access samples
+                alignment: Alignment.center,
+                child: Container(
+                  width: 2,
+                  height: 36,  // Set a fixed height for the base bar
+                  color: widget.color,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// Audio controls shown when connected
 class AudioControls extends StatelessWidget {
   const AudioControls({super.key});
@@ -242,21 +289,35 @@ class AudioControls extends StatelessWidget {
   Widget build(BuildContext context) {
     final roomContext = context.watch<RoomContext>();
     final isMicEnabled = roomContext.localParticipant?.isMicrophoneEnabled() ?? false;
+    final audioTrack = roomContext.localParticipant?.audioTrackPublications.firstOrNull?.track as AudioTrack?;
 
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: IconButton(
-        icon: Icon(
-          isMicEnabled ? Icons.mic : Icons.mic_off,
-          color: Theme.of(context).colorScheme.primary,
-        ),
-        onPressed: () {
-          roomContext.localParticipant?.setMicrophoneEnabled(!isMicEnabled);
-        },
+      padding: const EdgeInsets.only(right: 12),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: Icon(
+              isMicEnabled ? Icons.mic : Icons.mic_off,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            onPressed: () {
+              roomContext.localParticipant?.setMicrophoneEnabled(!isMicEnabled);
+            },
+          ),
+          if (audioTrack != null && isMicEnabled)
+            LocalAudioVisualizer(
+              audioTrack: audioTrack,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+        ],
       ),
     );
   }
 }
+
+

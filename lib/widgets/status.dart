@@ -42,7 +42,7 @@ class StatusWidget extends StatelessWidget {
         audioTrack: audioTrack,
         options: AudioVisualizerOptions(
           color: Theme.of(context).colorScheme.primary,
-          count: 5,
+          count: 7,
         ),
       ),
     );
