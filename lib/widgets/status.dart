@@ -41,6 +41,9 @@ class StatusWidget extends StatelessWidget {
       child: SoundWaveformWidget(
         audioTrack: audioTrack,
         options: AudioVisualizerOptions(
+          width: 32,
+          minHeight: 32,
+          maxHeight: 256,
           color: Theme.of(context).colorScheme.primary,
           count: 7,
         ),
