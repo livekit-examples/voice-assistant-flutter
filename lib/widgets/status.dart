@@ -28,7 +28,7 @@ class StatusWidget extends StatelessWidget {
       agentParticipant.metadata ?? 'initializing'
     );
 
-    final audioTrack = agentParticipant.audioTrackPublications.firstOrNull;
+    final audioTrack = agentParticipant.audioTrackPublications.firstOrNull?.track as AudioTrack?;
 
     // If no audio track yet, show nothing
     if (audioTrack == null) {
@@ -38,9 +38,12 @@ class StatusWidget extends StatelessWidget {
     return AnimatedOpacity(
       duration: const Duration(seconds: 1),
       opacity: agentState == AgentState.speaking ? 1.0 : 0.3,
-      child: ChangeNotifierProvider(
-        create: (_) => TrackReferenceContext(agentParticipant, pub: audioTrack),
-        child: AudioVisualizerWidget(),
+      child: SoundWaveformWidget(
+        audioTrack: audioTrack,
+        options: AudioVisualizerOptions(
+          color: Theme.of(context).colorScheme.primary,
+          count: 5,
+        ),
       ),
     );
   }
@@ -48,7 +51,7 @@ class StatusWidget extends StatelessWidget {
 
 enum AgentState {
   initializing,
-  speaking,
+  speaking, 
   thinking;
 
   static AgentState fromString(String value) {
