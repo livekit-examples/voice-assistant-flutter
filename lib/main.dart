@@ -5,6 +5,7 @@ import 'package:livekit_components/livekit_components.dart' hide ControlBar;
 import 'package:provider/provider.dart';
 import './widgets/control_bar.dart';
 import './services/token_service.dart';
+import './widgets/status.dart';
 
 void main() async {
   await dotenv.load(fileName: ".env");
@@ -48,7 +49,8 @@ class VoiceAssistant extends StatefulWidget {
 }
 
 class _VoiceAssistantState extends State<VoiceAssistant> {
-  final room = Room();
+  final room = Room(roomOptions: RoomOptions(enableVisualizer: true));
+  
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +61,21 @@ class _VoiceAssistantState extends State<VoiceAssistant> {
       ],
       child: Scaffold(
         body: Center(
-          child: ControlBar(),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  height: 256,
+                  width: 512,
+                  child: StatusWidget(),
+                ),
+                const SizedBox(height: 24),
+                ControlBar(),
+              ],
+            ),
+          ),
         ),
       ),
     );
