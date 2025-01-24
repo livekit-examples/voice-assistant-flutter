@@ -210,30 +210,44 @@ class _LocalAudioVisualizerState extends State<LocalAudioVisualizer> {
   EventsListener<TrackEvent>? _listener;
 
   void _startVisualizer(AudioTrack? track) {
-    _listener = track?.createListener();
-    _listener
-      ?..on<AudioVisualizerEvent>((e) {
+    // Clear previous listener
+    _stopVisualizer();
+    
+    // Reset visualizer immediately for null tracks
+    if (track == null) {
+      _resetVisualizer();
+      return;
+    }
+    
+    _listener = track.createListener();
+    _listener?.on<AudioVisualizerEvent>((e) {
         if (mounted) {
           setState(() {
-            // Safely process incoming audio data
             samples = e.event
                 .take(sampleCount)
-                .map((e) => ((e as num).toDouble() * 2).clamp(0.05, 1.0))  // Adjust scaling factor
+                .map((e) => ((e as num).toDouble() * 2).clamp(0.05, 1.0))
                 .toList();
-            // Ensure we always have 7 samples
-            while (samples.length < sampleCount){
+            while (samples.length < sampleCount) {
               samples.add(0.05);
             }
           });
         }
-      })
-      ..on<TrackMutedEvent>((e) {
-        if (mounted) {
-          setState(() {
-            samples = List.filled(sampleCount, 0.05);
-          });
-        }
       });
+  }
+
+  void _resetVisualizer() {
+    if (mounted) {
+      setState(() {
+        samples = List.filled(sampleCount, 0.05);
+      });
+    }
+  }
+
+  @override
+  void didUpdateWidget(LocalAudioVisualizer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Always call _startVisualizer, which will handle the null case properly
+    _startVisualizer(widget.audioTrack);
   }
 
   void _stopVisualizer() {
@@ -287,35 +301,37 @@ class AudioControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final roomContext = context.watch<RoomContext>();
-    final isMicEnabled = roomContext.localParticipant?.isMicrophoneEnabled() ?? false;
-    final audioTrack = roomContext.localParticipant?.audioTrackPublications.firstOrNull?.track as AudioTrack?;
+    return Consumer<RoomContext>(
+      builder: (context, roomContext, _) {
+        final isMicEnabled = roomContext.isMicrophoneEnabled ?? false;
+        final micTrack = roomContext.localParticipant?.getTrackPublicationBySource(TrackSource.microphone)?.track as AudioTrack?;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      padding: const EdgeInsets.only(right: 12),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            icon: Icon(
-              isMicEnabled ? Icons.mic : Icons.mic_off,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            onPressed: () {
-              roomContext.localParticipant?.setMicrophoneEnabled(!isMicEnabled);
-            },
+        return Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
           ),
-          if (audioTrack != null && isMicEnabled)
-            LocalAudioVisualizer(
-              audioTrack: audioTrack,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-        ],
-      ),
+          padding: const EdgeInsets.only(right: 12),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: Icon(
+                  isMicEnabled ? Icons.mic : Icons.mic_off,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                onPressed: () {
+                  roomContext.localParticipant?.setMicrophoneEnabled(!isMicEnabled);
+                },
+              ),
+              LocalAudioVisualizer(
+                audioTrack: micTrack,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

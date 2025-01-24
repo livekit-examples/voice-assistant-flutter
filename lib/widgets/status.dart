@@ -12,42 +12,44 @@ class StatusWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Use watch instead of read to rebuild when room state changes
-    final roomContext = context.watch<RoomContext>();
-    // Find the agent participant
-    RemoteParticipant? agentParticipant = roomContext.room.remoteParticipants.values
-        .where((p) => p.kind == ParticipantKind.AGENT)
-        .firstOrNull;
+    return Consumer<RoomContext>(
+      builder: (context, roomContext, child) {
+        // Find the agent participant
+        RemoteParticipant? agentParticipant = roomContext.room.remoteParticipants.values
+            .where((p) => p.kind == ParticipantKind.AGENT)
+            .firstOrNull;
 
-    // If no agent participant yet, show nothing    
-    if (agentParticipant == null) {
-      return const SizedBox.shrink();
-    }
+        // If no agent participant yet, show nothing    
+        if (agentParticipant == null) {
+          return const SizedBox.shrink();
+        }
 
-    final agentState = AgentState.fromString(
-      agentParticipant.metadata ?? 'initializing'
-    );
+        final agentState = AgentState.fromString(
+          agentParticipant.metadata ?? 'initializing'
+        );
 
-    final audioTrack = agentParticipant.audioTrackPublications.firstOrNull?.track as AudioTrack?;
+        final audioTrack = agentParticipant.audioTrackPublications.firstOrNull?.track as AudioTrack?;
 
-    // If no audio track yet, show nothing
-    if (audioTrack == null) {
-      return const SizedBox.shrink();
-    }
+        // If no audio track yet, show nothing
+        if (audioTrack == null) {
+          return const SizedBox.shrink();
+        }
 
-    return AnimatedOpacity(
-      duration: const Duration(seconds: 1),
-      opacity: agentState == AgentState.speaking ? 1.0 : 0.3,
-      child: SoundWaveformWidget(
-        audioTrack: audioTrack,
-        options: AudioVisualizerOptions(
-          width: 32,
-          minHeight: 32,
-          maxHeight: 256,
-          color: Theme.of(context).colorScheme.primary,
-          count: 7,
-        ),
-      ),
+        return AnimatedOpacity(
+          duration: const Duration(seconds: 1),
+          opacity: agentState == AgentState.speaking ? 1.0 : 0.3,
+          child: SoundWaveformWidget(
+            audioTrack: audioTrack,
+            options: AudioVisualizerOptions(
+              width: 32,
+              minHeight: 32,
+              maxHeight: 256,
+              color: Theme.of(context).colorScheme.primary,
+              count: 7,
+            ),
+          ),
+        );
+      },
     );
   }
 }
