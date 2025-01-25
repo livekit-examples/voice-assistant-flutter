@@ -20,42 +20,47 @@ class _StatusWidgetState extends State<StatusWidget> {
   Widget build(BuildContext context) {
     return Consumer<RoomContext>(
       builder: (context, roomContext, child) {
-        // Find the agent participant
-        RemoteParticipant? agentParticipant = roomContext.room.remoteParticipants.values
-            .where((p) => p.kind == ParticipantKind.AGENT)
-            .firstOrNull;
-
-        // If no agent participant yet, show nothing    
-        if (agentParticipant == null) {
-          return const SizedBox.shrink();
-        }
-
-        return ChangeNotifierProvider(
-          create: (context) => ParticipantContext(agentParticipant),
-          child: ParticipantAttributes(
-            builder: (context, attributes) {
-              final agentState = AgentState.fromString(
-                attributes?['lk.agent.state'] ?? 'initializing'
-              );
-
-              final audioTrack = agentParticipant.audioTrackPublications.firstOrNull?.track as AudioTrack?;
-
-              // If no audio track yet, show nothing
-              if (audioTrack == null) {
+        // Listen to track publications by making the participant a ChangeNotifier
+        return ChangeNotifierProvider.value(
+          value: roomContext.room.remoteParticipants.values
+              .where((p) => p.kind == ParticipantKind.AGENT)
+              .firstOrNull,
+          child: Consumer<RemoteParticipant?>(
+            builder: (context, agentParticipant, child) {
+              // If no agent participant yet, show nothing    
+              if (agentParticipant == null) {
                 return const SizedBox.shrink();
               }
 
-              return _AnimatedOpacityWidget(
-                agentState: agentState,
-                child: SoundWaveformWidget(
-                  audioTrack: audioTrack,
-                  options: AudioVisualizerOptions(
-                    width: 32,
-                    minHeight: 32,
-                    maxHeight: 256,
-                    color: Theme.of(context).colorScheme.primary,
-                    count: 7,
-                  ),
+              return ChangeNotifierProvider(
+                create: (context) => ParticipantContext(agentParticipant),
+                child: ParticipantAttributes(
+                  builder: (context, attributes) {
+                    final agentState = AgentState.fromString(
+                      attributes?['lk.agent.state'] ?? 'initializing'
+                    );
+
+                    final audioTrack = agentParticipant.audioTrackPublications.firstOrNull?.track as AudioTrack?;
+
+                    // If no audio track yet, show nothing
+                    if (audioTrack == null) {
+                      return const SizedBox.shrink();
+                    }
+
+                    return _AnimatedOpacityWidget(
+                      agentState: agentState,
+                      child: SoundWaveformWidget(
+                        audioTrack: audioTrack,
+                        options: AudioVisualizerOptions(
+                          width: 32,
+                          minHeight: 32,
+                          maxHeight: 256,
+                          color: Theme.of(context).colorScheme.primary,
+                          count: 7,
+                        ),
+                      ),
+                    );
+                  },
                 ),
               );
             },
