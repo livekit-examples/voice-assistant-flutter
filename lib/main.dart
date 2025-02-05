@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Voice Assistant',
       theme: ThemeData(
-        colorScheme: ColorScheme.light(
+        colorScheme: const ColorScheme.light(
           primary: Colors.black,
           secondary: Colors.black,
           surface: Colors.white,
@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       darkTheme: ThemeData(
-        colorScheme: ColorScheme.dark(
+        colorScheme: const ColorScheme.dark(
           primary: Colors.white,
           secondary: Colors.white,
           surface: Colors.black,
@@ -49,8 +49,7 @@ class VoiceAssistant extends StatefulWidget {
 }
 
 class _VoiceAssistantState extends State<VoiceAssistant> {
-  final room = Room(roomOptions: RoomOptions(enableVisualizer: true));
-  
+  final room = Room(roomOptions: const RoomOptions(enableVisualizer: true));
 
   @override
   Widget build(BuildContext context) {
@@ -68,14 +67,14 @@ class _VoiceAssistantState extends State<VoiceAssistant> {
               spacing: 24,
               children: [
                 ConstrainedBox(
-                  constraints: BoxConstraints(
+                  constraints: const BoxConstraints(
                     maxWidth: 512,
                     minHeight: 256,
                     maxHeight: 256,
                   ),
-                  child: StatusWidget(),
+                  child: const StatusWidget(),
                 ),
-                ControlBar(),
+                const ControlBar(),
               ],
             ),
           ),

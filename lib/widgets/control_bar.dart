@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:livekit_client/livekit_client.dart' as livekit show ConnectionState;
+import 'package:livekit_client/livekit_client.dart' as livekit
+    show ConnectionState;
 import 'package:livekit_client/livekit_client.dart';
 import 'package:provider/provider.dart';
 import '../services/token_service.dart';
@@ -25,9 +26,10 @@ class _ControlBarState extends State<ControlBar> {
     if (isConnecting || isDisconnecting) {
       return Configuration.transitioning;
     }
-    
+
     final roomContext = context.read<RoomContext>();
-    if (roomContext.room.connectionState == livekit.ConnectionState.disconnected) {
+    if (roomContext.room.connectionState ==
+        livekit.ConnectionState.disconnected) {
       return Configuration.disconnected;
     } else {
       return Configuration.connected;
@@ -37,15 +39,17 @@ class _ControlBarState extends State<ControlBar> {
   Future<void> connect() async {
     final roomContext = context.read<RoomContext>();
     final tokenService = context.read<TokenService>();
-    
+
     setState(() {
       isConnecting = true;
     });
 
     try {
       // Generate random room and participant names
-      final roomName = 'room-${(1000 + DateTime.now().millisecondsSinceEpoch % 9000)}';
-      final participantName = 'user-${(1000 + DateTime.now().millisecondsSinceEpoch % 9000)}';
+      final roomName =
+          'room-${(1000 + DateTime.now().millisecondsSinceEpoch % 9000)}';
+      final participantName =
+          'user-${(1000 + DateTime.now().millisecondsSinceEpoch % 9000)}';
 
       final connectionDetails = await tokenService.fetchConnectionDetails(
         roomName: roomName,
@@ -62,7 +66,7 @@ class _ControlBarState extends State<ControlBar> {
       );
       await roomContext.localParticipant?.setMicrophoneEnabled(true);
     } catch (error) {
-      print('Connection error: $error');
+      debugPrint('Connection error: $error');
     } finally {
       setState(() {
         isConnecting = false;
@@ -72,7 +76,7 @@ class _ControlBarState extends State<ControlBar> {
 
   Future<void> disconnect() async {
     final roomContext = context.read<RoomContext>();
-    
+
     setState(() {
       isDisconnecting = true;
     });
@@ -90,34 +94,33 @@ class _ControlBarState extends State<ControlBar> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Spacer(),
-        
+
         // Show different buttons based on connection state
         Builder(builder: (context) {
           switch (currentConfiguration) {
             case Configuration.disconnected:
               return ConnectButton(onPressed: connect);
-              
+
             case Configuration.connected:
               return Row(
                 children: [
-                  AudioControls(),
+                  const AudioControls(),
                   const SizedBox(width: 16),
                   DisconnectButton(onPressed: disconnect),
                 ],
               );
-              
+
             case Configuration.transitioning:
-              return TransitionButton(
-                isConnecting: isConnecting
-              );
+              return TransitionButton(isConnecting: isConnecting);
           }
         }),
-        
+
         const Spacer(),
       ],
     );
   }
 }
+
 /// Button shown when disconnected to start a new conversation
 class ConnectButton extends StatelessWidget {
   final VoidCallback onPressed;
@@ -193,7 +196,7 @@ class TransitionButton extends StatelessWidget {
 class LocalAudioVisualizer extends StatefulWidget {
   final AudioTrack? audioTrack;
   final Color color;
-  
+
   const LocalAudioVisualizer({
     super.key,
     required this.audioTrack,
@@ -206,33 +209,34 @@ class LocalAudioVisualizer extends StatefulWidget {
 
 class _LocalAudioVisualizerState extends State<LocalAudioVisualizer> {
   static const int sampleCount = 7;
-  List<double> samples = List.filled(sampleCount, 0.05); // Minimum scale of 0.05
+  List<double> samples =
+      List.filled(sampleCount, 0.05); // Minimum scale of 0.05
   EventsListener<TrackEvent>? _listener;
 
   void _startVisualizer(AudioTrack? track) {
     // Clear previous listener
     _stopVisualizer();
-    
+
     // Reset visualizer immediately for null tracks
     if (track == null) {
       _resetVisualizer();
       return;
     }
-    
+
     _listener = track.createListener();
     _listener?.on<AudioVisualizerEvent>((e) {
-        if (mounted) {
-          setState(() {
-            samples = e.event
-                .take(sampleCount)
-                .map((e) => ((e as num).toDouble() * 2).clamp(0.05, 1.0))
-                .toList();
-            while (samples.length < sampleCount) {
-              samples.add(0.05);
-            }
-          });
-        }
-      });
+      if (mounted) {
+        setState(() {
+          samples = e.event
+              .take(sampleCount)
+              .map((e) => ((e as num).toDouble() * 2).clamp(0.05, 1.0))
+              .toList();
+          while (samples.length < sampleCount) {
+            samples.add(0.05);
+          }
+        });
+      }
+    });
   }
 
   void _resetVisualizer() {
@@ -268,8 +272,9 @@ class _LocalAudioVisualizerState extends State<LocalAudioVisualizer> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(  // Add a SizedBox to constrain the size
-      height: 44,     // Provide a reasonable height
+    return SizedBox(
+      // Add a SizedBox to constrain the size
+      height: 44, // Provide a reasonable height
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: Row(
@@ -279,11 +284,13 @@ class _LocalAudioVisualizerState extends State<LocalAudioVisualizer> {
             (index) => Padding(
               padding: EdgeInsets.only(right: index < sampleCount - 1 ? 3 : 8),
               child: Transform.scale(
-                scaleY: index < samples.length ? samples[index] : 0.05,  // Safely access samples
+                scaleY: index < samples.length
+                    ? samples[index]
+                    : 0.05, // Safely access samples
                 alignment: Alignment.center,
                 child: Container(
                   width: 2,
-                  height: 36,  // Set a fixed height for the base bar
+                  height: 36, // Set a fixed height for the base bar
                   color: widget.color,
                 ),
               ),
@@ -304,7 +311,9 @@ class AudioControls extends StatelessWidget {
     return Consumer<RoomContext>(
       builder: (context, roomContext, _) {
         final isMicEnabled = roomContext.isMicrophoneEnabled ?? false;
-        final micTrack = roomContext.localParticipant?.getTrackPublicationBySource(TrackSource.microphone)?.track as AudioTrack?;
+        final micTrack = roomContext.localParticipant
+            ?.getTrackPublicationBySource(TrackSource.microphone)
+            ?.track as AudioTrack?;
 
         return Container(
           decoration: BoxDecoration(
@@ -321,7 +330,8 @@ class AudioControls extends StatelessWidget {
                   color: Theme.of(context).colorScheme.primary,
                 ),
                 onPressed: () {
-                  roomContext.localParticipant?.setMicrophoneEnabled(!isMicEnabled);
+                  roomContext.localParticipant
+                      ?.setMicrophoneEnabled(!isMicEnabled);
                 },
               ),
               LocalAudioVisualizer(
@@ -335,5 +345,3 @@ class AudioControls extends StatelessWidget {
     );
   }
 }
-
-

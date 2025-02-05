@@ -1,0 +1,30 @@
+name: Analyze & Format
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ '*' ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: dart format
+        run: dart format --set-exit-if-changed .
+
+      - name: flutter analyze
+        run: flutter analyze --no-fatal-infos
+
+    

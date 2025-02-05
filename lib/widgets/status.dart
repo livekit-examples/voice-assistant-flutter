@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:livekit_client/livekit_client.dart';
-import 'package:livekit_components/livekit_components.dart' hide ParticipantKind;
+import 'package:livekit_components/livekit_components.dart'
+    hide ParticipantKind;
 import 'package:provider/provider.dart';
-import 'dart:math';
 
 /// Shows a visualizer for the agent participant in the room
 /// In a more complex app, you may want to show more information here
@@ -27,7 +27,7 @@ class _StatusWidgetState extends State<StatusWidget> {
               .firstOrNull,
           child: Consumer<RemoteParticipant?>(
             builder: (context, agentParticipant, child) {
-              // If no agent participant yet, show nothing    
+              // If no agent participant yet, show nothing
               if (agentParticipant == null) {
                 return const SizedBox.shrink();
               }
@@ -37,10 +37,10 @@ class _StatusWidgetState extends State<StatusWidget> {
                 child: ParticipantAttributes(
                   builder: (context, attributes) {
                     final agentState = AgentState.fromString(
-                      attributes?['lk.agent.state'] ?? 'initializing'
-                    );
+                        attributes?['lk.agent.state'] ?? 'initializing');
 
-                    final audioTrack = agentParticipant.audioTrackPublications.firstOrNull?.track as AudioTrack?;
+                    final audioTrack = agentParticipant.audioTrackPublications
+                        .firstOrNull?.track as AudioTrack?;
 
                     // If no audio track yet, show nothing
                     if (audioTrack == null) {
@@ -73,7 +73,7 @@ class _StatusWidgetState extends State<StatusWidget> {
 
 enum AgentState {
   initializing,
-  speaking, 
+  speaking,
   thinking,
   listening;
 
@@ -98,15 +98,18 @@ class _AnimatedOpacityWidget extends StatefulWidget {
   State<_AnimatedOpacityWidget> createState() => _AnimatedOpacityWidgetState();
 }
 
-class _AnimatedOpacityWidgetState extends State<_AnimatedOpacityWidget> with SingleTickerProviderStateMixin {
+class _AnimatedOpacityWidgetState extends State<_AnimatedOpacityWidget>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
   Duration _getDuration() {
     switch (widget.agentState) {
       case AgentState.thinking:
-        return const Duration(milliseconds: 500); // Faster animation for thinking
+        return const Duration(
+            milliseconds: 500); // Faster animation for thinking
       default:
-        return const Duration(milliseconds: 1000); // Default duration for other states
+        return const Duration(
+            milliseconds: 1000); // Default duration for other states
     }
   }
 
