@@ -28,3 +28,6 @@ doc/api/
 
 .DS_Store
 .vscode
+
+.idea/
+*.iml
