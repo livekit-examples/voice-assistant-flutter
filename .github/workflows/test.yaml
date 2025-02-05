@@ -1,4 +1,4 @@
-name: Analyze & Format
+name: Test
 
 on:
   push:
@@ -27,4 +27,9 @@ jobs:
       - name: flutter analyze
         run: flutter analyze --no-fatal-infos
 
+      - name: flutter test
+        run: flutter test
+
+      - name: iOS Build
+        run: flutter build ios
     
