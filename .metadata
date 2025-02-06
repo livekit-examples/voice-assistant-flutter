@@ -15,7 +15,7 @@ migration:
     - platform: root
       create_revision: c519ee916eaeb88923e67befb89c0f1dabfa83e6
       base_revision: c519ee916eaeb88923e67befb89c0f1dabfa83e6
-    - platform: macos
+    - platform: android
       create_revision: c519ee916eaeb88923e67befb89c0f1dabfa83e6
       base_revision: c519ee916eaeb88923e67befb89c0f1dabfa83e6
 
