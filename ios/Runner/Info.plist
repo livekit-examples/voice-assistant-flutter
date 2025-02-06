@@ -45,5 +45,9 @@
 	<true/>
 	<key>NSMicrophoneUsageDescription</key>
   	<string>Voice Assistant uses your microphone</string>
+	<key>UIBackgroundModes</key>
+	<array>
+	<string>audio</string>
+	</array>
 </dict>
 </plist>
