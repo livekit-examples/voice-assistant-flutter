@@ -18,6 +18,9 @@ jobs:
         with:
           channel: 'stable'
 
+      - name: Create empty .env file
+        run: touch .env
+
       - name: Install dependencies
         run: flutter pub get
 
