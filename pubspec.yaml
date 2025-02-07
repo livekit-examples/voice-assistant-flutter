@@ -30,15 +30,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  livekit_components:
-    path: ../../livekit/components-flutter
-  livekit_client:
-    path: ../../livekit/client-sdk-flutter
+  livekit_components: ^1.1.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-  # livekit_client: ^2.3.5
+  livekit_client: ^2.3.6
   flutter_dotenv: ^5.2.1
   http: ^1.3.0
   provider: ^6.1.2
