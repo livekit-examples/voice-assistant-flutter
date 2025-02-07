@@ -1,3 +1,5 @@
 version: "3"
 output: interleaved
-dotenv: [".env"]
+
+vars:
+  env_file: ".env"
