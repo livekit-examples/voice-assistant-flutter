@@ -6,11 +6,18 @@ import 'package:provider/provider.dart';
 import '../services/token_service.dart';
 import 'package:livekit_components/livekit_components.dart';
 
-// Configuration states based on connection status
+/// Possible states for the control bar UI
+/// - disconnected: Not connected to a LiveKit room
+/// - connected: Successfully connected and streaming
+/// - transitioning: Currently connecting or disconnecting
 enum Configuration { disconnected, connected, transitioning }
 
-/// The ControlBar component handles connection, disconnection, and audio controls
-/// You can customize this component to fit your app's needs
+/// The main control interface for the voice assistant
+/// Handles:
+/// - Connecting to LiveKit rooms
+/// - Disconnecting from rooms
+/// - Toggling microphone
+/// - Displaying audio visualization
 class ControlBar extends StatefulWidget {
   const ControlBar({super.key});
 
@@ -19,14 +26,17 @@ class ControlBar extends StatefulWidget {
 }
 
 class _ControlBarState extends State<ControlBar> {
+  // Track connection state transitions
   bool isConnecting = false;
   bool isDisconnecting = false;
 
+  // Helper to determine the current UI configuration based on connection state
   Configuration get currentConfiguration {
     if (isConnecting || isDisconnecting) {
       return Configuration.transitioning;
     }
 
+    // Check the LiveKit room's connection state
     final roomContext = context.read<RoomContext>();
     if (roomContext.room.connectionState ==
         livekit.ConnectionState.disconnected) {
@@ -36,6 +46,11 @@ class _ControlBarState extends State<ControlBar> {
     }
   }
 
+  /// Connects to a LiveKit room by:
+  /// 1. Generating random room/participant names
+  /// 2. Getting connection details from TokenService
+  /// 3. Connecting to the room using RoomContext
+  /// 4. Enabling the microphone
   Future<void> connect() async {
     final roomContext = context.read<RoomContext>();
     final tokenService = context.read<TokenService>();
@@ -46,11 +61,13 @@ class _ControlBarState extends State<ControlBar> {
 
     try {
       // Generate random room and participant names
+      // In a real app, you'd likely use meaningful names
       final roomName =
           'room-${(1000 + DateTime.now().millisecondsSinceEpoch % 9000)}';
       final participantName =
           'user-${(1000 + DateTime.now().millisecondsSinceEpoch % 9000)}';
 
+      // Get connection details from token service
       final connectionDetails = await tokenService.fetchConnectionDetails(
         roomName: roomName,
         participantName: participantName,
@@ -60,10 +77,13 @@ class _ControlBarState extends State<ControlBar> {
         throw Exception('Failed to get connection details');
       }
 
+      // Connect to the LiveKit room
       await roomContext.connect(
         url: connectionDetails.serverUrl,
         token: connectionDetails.participantToken,
       );
+
+      // Enable the microphone after connecting
       await roomContext.localParticipant?.setMicrophoneEnabled(true);
     } catch (error) {
       debugPrint('Connection error: $error');
@@ -74,6 +94,7 @@ class _ControlBarState extends State<ControlBar> {
     }
   }
 
+  /// Disconnects from the current LiveKit room
   Future<void> disconnect() async {
     final roomContext = context.read<RoomContext>();
 

@@ -7,15 +7,17 @@ import './widgets/control_bar.dart';
 import './services/token_service.dart';
 import './widgets/status.dart';
 
+// Load environment variables before starting the app
+// This is used to configure the LiveKit sandbox ID for development
 void main() async {
   await dotenv.load(fileName: ".env");
   runApp(const MyApp());
 }
 
+// Main app configuration with light/dark theme support
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -42,6 +44,8 @@ class MyApp extends StatelessWidget {
   }
 }
 
+/// The main voice assistant screen that manages the LiveKit room connection
+/// and displays the status visualizer and control bar
 class VoiceAssistant extends StatefulWidget {
   const VoiceAssistant({super.key});
   @override
@@ -49,11 +53,16 @@ class VoiceAssistant extends StatefulWidget {
 }
 
 class _VoiceAssistantState extends State<VoiceAssistant> {
+  // Create a LiveKit Room instance with audio visualization enabled
+  // This is the main object that manages the connection to LiveKit
   final room = Room(roomOptions: const RoomOptions(enableVisualizer: true));
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
+      // Provide the TokenService and RoomContext to descendant widgets
+      // TokenService handles LiveKit authentication
+      // RoomContext provides LiveKit room state and operations
       providers: [
         ChangeNotifierProvider(create: (context) => TokenService()),
         ChangeNotifierProvider(create: (context) => RoomContext(room: room)),
@@ -66,6 +75,7 @@ class _VoiceAssistantState extends State<VoiceAssistant> {
               mainAxisAlignment: MainAxisAlignment.center,
               spacing: 24,
               children: [
+                // Status widget shows the agent's audio visualization
                 ConstrainedBox(
                   constraints: const BoxConstraints(
                     maxWidth: 512,
@@ -74,6 +84,7 @@ class _VoiceAssistantState extends State<VoiceAssistant> {
                   ),
                   child: const StatusWidget(),
                 ),
+                // Control bar handles room connection and audio controls
                 const ControlBar(),
               ],
             ),

@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+/// Data class representing the connection details needed to join a LiveKit room
+/// This includes the server URL, room name, participant info, and auth token
 class ConnectionDetails {
   final String serverUrl;
   final String roomName;
@@ -43,11 +45,12 @@ class ConnectionDetails {
 ///
 /// See https://docs.livekit.io/home/get-started/authentication for more information
 class TokenService extends ChangeNotifier {
+  // For hardcoded token usage (development only)
   final String? hardcodedServerUrl = null;
   final String? hardcodedToken = null;
 
+  // Get the sandbox ID from environment variables
   String? get sandboxId {
-    // Using flutter_dotenv instead of Info.plist
     final value = dotenv.env['LIVEKIT_SANDBOX_ID'];
     if (value != null) {
       // Remove unwanted double quotes if present
@@ -56,9 +59,12 @@ class TokenService extends ChangeNotifier {
     return null;
   }
 
+  // LiveKit Cloud sandbox API endpoint
   final String sandboxUrl =
       'https://cloud-api.livekit.io/api/sandbox/connection-details';
 
+  /// Main method to get connection details
+  /// First tries hardcoded credentials, then falls back to sandbox
   Future<ConnectionDetails?> fetchConnectionDetails({
     required String roomName,
     required String participantName,

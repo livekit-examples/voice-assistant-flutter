@@ -5,7 +5,11 @@ import 'package:livekit_components/livekit_components.dart'
 import 'package:provider/provider.dart';
 
 /// Shows a visualizer for the agent participant in the room
-/// In a more complex app, you may want to show more information here
+/// This widget:
+/// 1. Finds the agent participant in the room
+/// 2. Listens to their audio track
+/// 3. Shows a waveform visualization of their audio
+/// 4. Adjusts opacity based on agent state (speaking/thinking/listening)
 class StatusWidget extends StatefulWidget {
   const StatusWidget({
     super.key,
@@ -20,7 +24,9 @@ class _StatusWidgetState extends State<StatusWidget> {
   Widget build(BuildContext context) {
     return Consumer<RoomContext>(
       builder: (context, roomContext, child) {
-        // Listen to track publications by making the participant a ChangeNotifier
+        // Find the agent participant in the room
+        // LiveKit supports different participant types (agent/client/subscriber)
+        // We only care about the agent participant here
         return ChangeNotifierProvider.value(
           value: roomContext.room.remoteParticipants.values
               .where((p) => p.kind == ParticipantKind.AGENT)
@@ -32,13 +38,18 @@ class _StatusWidgetState extends State<StatusWidget> {
                 return const SizedBox.shrink();
               }
 
+              // Listen to the agent's metadata attributes
+              // These include the agent's state (speaking/thinking/listening)
               return ChangeNotifierProvider(
                 create: (context) => ParticipantContext(agentParticipant),
                 child: ParticipantAttributes(
                   builder: (context, attributes) {
+                    // Get the agent's state from their metadata
+                    // LiveKit uses a 'lk.agent.state' attribute to track this
                     final agentState = AgentState.fromString(
                         attributes?['lk.agent.state'] ?? 'initializing');
 
+                    // Get the agent's audio track for visualization
                     final audioTrack = agentParticipant.audioTrackPublications
                         .firstOrNull?.track as AudioTrack?;
 
@@ -47,6 +58,7 @@ class _StatusWidgetState extends State<StatusWidget> {
                       return const SizedBox.shrink();
                     }
 
+                    // Show the waveform with opacity based on agent state
                     return _AnimatedOpacityWidget(
                       agentState: agentState,
                       child: SoundWaveformWidget(
@@ -71,11 +83,13 @@ class _StatusWidgetState extends State<StatusWidget> {
   }
 }
 
+/// Possible states for the agent participant
+/// These states are set by the agent and sent via LiveKit metadata
 enum AgentState {
-  initializing,
-  speaking,
-  thinking,
-  listening;
+  initializing, // Agent is starting up
+  speaking, // Agent is speaking to the user
+  thinking, // Agent is processing user input
+  listening; // Agent is listening to user audio
 
   static AgentState fromString(String value) {
     return AgentState.values.firstWhere(
@@ -85,6 +99,8 @@ enum AgentState {
   }
 }
 
+/// Helper widget to animate the opacity of the waveform
+/// based on the agent's current state
 class _AnimatedOpacityWidget extends StatefulWidget {
   final AgentState agentState;
   final Widget child;
@@ -102,6 +118,7 @@ class _AnimatedOpacityWidgetState extends State<_AnimatedOpacityWidget>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
+  // Different states have different animation durations
   Duration _getDuration() {
     switch (widget.agentState) {
       case AgentState.thinking:
@@ -136,16 +153,17 @@ class _AnimatedOpacityWidgetState extends State<_AnimatedOpacityWidget>
     super.dispose();
   }
 
+  // Different states have different opacity ranges
   double _getOpacity() {
     switch (widget.agentState) {
       case AgentState.initializing:
-        return 0.3;
+        return 0.3; // Dim when starting
       case AgentState.speaking:
-        return 1.0;
+        return 1.0; // Fully visible when speaking
       case AgentState.thinking:
-        return 0.3 + (0.5 * _controller.value);
+        return 0.3 + (0.5 * _controller.value); // Pulsing when thinking
       case AgentState.listening:
-        return 0.3 + (0.5 * _controller.value);
+        return 0.3 + (0.5 * _controller.value); // Pulsing when listening
     }
   }
 
