@@ -33,6 +33,6 @@ jobs:
       - name: flutter test
         run: flutter test
 
-      - name: iOS Build
-        run: flutter build ios
+      - name: Android Build
+        run: flutter pub get && flutter test && flutter build apk && flutter build appbundle
     
