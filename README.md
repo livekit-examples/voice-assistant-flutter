@@ -43,3 +43,19 @@ In production, you will want to host your own token server to generate tokens in
 ## Agent
 
 This example app requires an AI agent to communicate with. You can use one of our example agents in [livekit-examples](https://github.com/livekit-examples/), or create your own following one of our [agent quickstarts](https://docs.livekit.io/agents/quickstart/).
+
+## Running the App
+
+1. Make sure you have Flutter installed on your system. If not, follow the [official Flutter installation guide](https://docs.flutter.dev/get-started/install).
+
+2. Install dependencies:
+```bash
+flutter pub get
+```
+
+3. Run the app:
+```bash
+flutter run
+```
+
+Note: You may need to open the project in Xcode to configure signing certificates if building to a real device.
