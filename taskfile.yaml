@@ -3,3 +3,14 @@ output: interleaved
 
 vars:
   env_file: ".env"
+
+tasks:
+  post_create:
+    desc: "Runs after this template is instantiated as a Sandbox or Bootstrap"
+    cmds:
+      - echo -e "\nYour Flutter voice assistant is ready to go!\n"
+      - echo -e "To give it a try:"
+      - echo -e "    cd {{.ROOT_DIR}}"
+      - echo -e "    flutter pub get"
+      - echo -e "    flutter run"
+      - echo -e "\nFor more help view your project's README.md file or join our Slack community at https://livekit.io/join-slack."
