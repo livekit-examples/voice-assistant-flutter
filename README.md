@@ -18,6 +18,8 @@ A simple example AI voice assistant using the LiveKit [Flutter SDK](https://gith
 
 This example is made for iOS, macOS, and Android.
 
+<img src="./assets/screenshot.png" alt="Voice Assistant Screenshot" height="500">
+
 ## Installation
 
 ### Using the LiveKit CLI
