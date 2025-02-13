@@ -1,63 +1,42 @@
-<a href="https://livekit.io/">
-  <img src="./.github/assets/livekit-mark.png" alt="LiveKit logo" width="100" height="100">
-</a>
+<img src="./.github/assets/app-icon.png" alt="Voice assistant app icon" width="100" height="100">
 
 # Flutter Voice Assistant
 
-<p>
-  <a href="https://cloud.livekit.io/projects/p_/sandbox"><strong>Deploy a sandbox app</strong></a>
-  •
-  <a href="https://docs.livekit.io/agents/overview/">LiveKit Agents Docs</a>
-  •
-  <a href="https://livekit.io/cloud">LiveKit Cloud</a>
-  •
-  <a href="https://blog.livekit.io/">Blog</a>
-</p>
+This is a starter template for [LiveKit Agents](https://docs.livekit.io/agents/overview/) that provides a simple voice interface using the [LiveKit Flutter SDK](https://github.com/livekit/client-sdk-flutter).
 
-A simple example AI voice assistant using the LiveKit [Flutter SDK](https://github.com/livekit/client-sdk-flutter).
-
-This example is made for iOS, macOS, and Android.
+This template is compatible with iOS, macOS, and Android and is free for you to use or modify as you see fit.
 
 <img src="./.github/assets/screenshot.png" alt="Voice Assistant Screenshot" height="500">
 
-## Installation
+## Getting started
 
-### Using the LiveKit CLI
+The easiest way to get this app running is with the [Sandbox for LiveKit Cloud](https://cloud.livekit.io/projects/p_/sandbox) and the [LiveKit CLI](https://docs.livekit.io/home/cli/cli-setup/).
 
-The easiest way to get started is to use the [LiveKit CLI](https://docs.livekit.io/home/cli/cli-setup/). Run the following command to bootstrap this template:
+First, create a new [Sandbox Token Server](https://cloud.livekit.io/projects/p_mytc7vpzfkt/sandbox/templates/token-server) for your LiveKit Cloud project.
+
+Then, run the following command to automatically clone this template and connect it to LiveKit Cloud.
 
 ```bash
-lk app create --template voice-assistant-flutter [--sandbox <sandboxID>]
+lk app create --template voice-assistant-flutter --sandbox <token_server_sandbox_id>
 ```
 
-Then follow instructions to [set up an agent](#agent) for your app to talk to.
-
-### Manual Installation
-
-Clone the repository and then either create a `.env` with a `LIVEKIT_SANDBOX_ID` (if using a hosted Token Server via [Sandboxes](https://cloud.livekit.io/projects/p_/sandbox)), or open `token_service.dart` and add your [manually generated](#token-generation) URL and token.
-
-Then follow instructions to [set up an agent](#agent) for your app to talk to.
-
-## Token Generation
-
-In production, you will want to host your own token server to generate tokens in order for users of your app to join LiveKit rooms. But while prototyping, you can either hardcode your token, or use a hosted Token Server via [Sandboxes](https://cloud.livekit.io/projects/p_/sandbox)). 
-
-## Agent
-
-This example app requires an AI agent to communicate with. You can use one of our example agents in [livekit-examples](https://github.com/livekit-examples/), or create your own following one of our [agent quickstarts](https://docs.livekit.io/agents/quickstart/).
-
-## Running the App
-
-1. Make sure you have Flutter installed on your system. If not, follow the [official Flutter installation guide](https://docs.flutter.dev/get-started/install).
-
-2. Install dependencies:
+Install dependencies and run the app:
 ```bash
 flutter pub get
-```
-
-3. Run the app:
-```bash
 flutter run
 ```
 
-Note: You may need to open the project in Xcode to configure signing certificates if building to a real device.
+Note: You may need to configure signing certificates in Xcode if building to a real iOS device.
+
+You'll also need an agent to speak with. Try our sample voice assistant agent for [Python](https://github.com/livekit-examples/voice-pipeline-agent-python), [Node.js](https://github.com/livekit-examples/voice-pipeline-agent-node), or [create your own from scratch](https://docs.livekit.io/agents/quickstart/).
+
+> [!NOTE]
+> To setup without the LiveKit CLI, clone the repository and then either create a `.env` with a `LIVEKIT_SANDBOX_ID` (if using a [Sandbox Token Server](https://cloud.livekit.io/projects/p_/sandbox/templates/token-server)), or open `token_service.dart` and add your [manually generated](#token-generation) URL and token.
+
+## Token generation
+
+In a production environment, you will be responsible for developing a solution to [generate tokens for your users](https://docs.livekit.io/home/server/generating-tokens/) which is integrated with your authentication solution. You should disable your sandbox token server and modify `token_service.dart` to use your own token server.
+
+## Contributing
+
+This template is open source and we welcome contributions! Please open a PR or issue through GitHub, and don't forget to join us in the [LiveKit Community Slack](https://livekit.io/join-slack)!
