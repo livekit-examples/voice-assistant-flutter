@@ -233,7 +233,6 @@ class _LocalAudioVisualizerState extends State<LocalAudioVisualizer> {
   List<double> samples =
       List.filled(sampleCount, 0.05); // Minimum scale of 0.05
 
-
   AudioVisualizer? _visualizer;
   EventsListener<AudioVisualizerEvent>? _listener;
 
@@ -241,14 +240,13 @@ class _LocalAudioVisualizerState extends State<LocalAudioVisualizer> {
     if (track == null) {
       return;
     }
-    
+
     setState(() {
-        samples = List.filled(sampleCount, 0.05);
+      samples = List.filled(sampleCount, 0.05);
     });
 
     _visualizer ??= createVisualizer(track,
-        options: const AudioVisualizerOptions(
-            barCount: sampleCount));
+        options: const AudioVisualizerOptions(barCount: sampleCount));
     _listener ??= _visualizer?.createListener();
     _listener?.on<AudioVisualizerEvent>((e) {
       if (mounted) {
