@@ -63,12 +63,12 @@ class _StatusWidgetState extends State<StatusWidget> {
                       agentState: agentState,
                       child: SoundWaveformWidget(
                         audioTrack: audioTrack,
-                        options: AudioVisualizerOptions(
+                        options: AudioVisualizerWidgetOptions(
                           width: 32,
                           minHeight: 32,
                           maxHeight: 256,
                           color: Theme.of(context).colorScheme.primary,
-                          count: 7,
+                          barCount: 7,
                         ),
                       ),
                     );

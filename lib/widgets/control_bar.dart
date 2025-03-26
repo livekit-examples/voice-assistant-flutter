@@ -229,22 +229,27 @@ class LocalAudioVisualizer extends StatefulWidget {
 }
 
 class _LocalAudioVisualizerState extends State<LocalAudioVisualizer> {
-  static const int sampleCount = 7;
+  static const int sampleCount = 5;
   List<double> samples =
       List.filled(sampleCount, 0.05); // Minimum scale of 0.05
-  EventsListener<TrackEvent>? _listener;
 
-  void _startVisualizer(AudioTrack? track) {
-    // Clear previous listener
-    _stopVisualizer();
 
-    // Reset visualizer immediately for null tracks
+  AudioVisualizer? _visualizer;
+  EventsListener<AudioVisualizerEvent>? _listener;
+
+  void _startVisualizer(AudioTrack? track) async {
     if (track == null) {
-      _resetVisualizer();
       return;
     }
+    
+    setState(() {
+        samples = List.filled(sampleCount, 0.05);
+    });
 
-    _listener = track.createListener();
+    _visualizer ??= createVisualizer(track,
+        options: const AudioVisualizerOptions(
+            barCount: sampleCount));
+    _listener ??= _visualizer?.createListener();
     _listener?.on<AudioVisualizerEvent>((e) {
       if (mounted) {
         setState(() {
@@ -258,25 +263,16 @@ class _LocalAudioVisualizerState extends State<LocalAudioVisualizer> {
         });
       }
     });
+
+    await _visualizer!.start();
   }
 
-  void _resetVisualizer() {
-    if (mounted) {
-      setState(() {
-        samples = List.filled(sampleCount, 0.05);
-      });
-    }
-  }
-
-  @override
-  void didUpdateWidget(LocalAudioVisualizer oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // Always call _startVisualizer, which will handle the null case properly
-    _startVisualizer(widget.audioTrack);
-  }
-
-  void _stopVisualizer() {
-    _listener?.dispose();
+  void _stopVisualizer() async {
+    await _visualizer?.stop();
+    await _visualizer?.dispose();
+    _visualizer = null;
+    await _listener?.dispose();
+    _listener = null;
   }
 
   @override
