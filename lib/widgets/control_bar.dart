@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:livekit_client/livekit_client.dart' as livekit
     show ConnectionState;
-import 'package:livekit_client/livekit_client.dart';
 import 'package:provider/provider.dart';
 import '../services/token_service.dart';
 import 'package:livekit_components/livekit_components.dart';
@@ -29,6 +28,10 @@ class _ControlBarState extends State<ControlBar> {
   // Track connection state transitions
   bool isConnecting = false;
   bool isDisconnecting = false;
+
+  final url = 'ws://localhost:7880';
+  final token =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDQ4NDM4ODAsImlzcyI6IkFQSXJramtRYVZRSjVERSIsIm5hbWUiOiJmbHQiLCJuYmYiOjE3NDMwNDM4ODAsInN1YiI6ImZsdCIsInZpZGVvIjp7ImNhblVwZGF0ZU93bk1ldGFkYXRhIjp0cnVlLCJyb29tIjoibGl2ZSIsInJvb21Kb2luIjp0cnVlfX0.pLiGaft3Yjh0DZ_8HdlbKQkV0RyWxwFLtQbDl9cJtfg';
 
   // Helper to determine the current UI configuration based on connection state
   Configuration get currentConfiguration {
@@ -79,8 +82,8 @@ class _ControlBarState extends State<ControlBar> {
 
       // Connect to the LiveKit room
       await roomContext.connect(
-        url: connectionDetails.serverUrl,
-        token: connectionDetails.participantToken,
+        url: url, //connectionDetails.serverUrl,
+        token: token, //connectionDetails.participantToken,
       );
 
       // Enable the microphone after connecting
@@ -198,7 +201,7 @@ class TransitionButton extends StatelessWidget {
     return TextButton(
       onPressed: null, // Disabled during transition
       style: TextButton.styleFrom(
-        backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+        backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
         foregroundColor: Theme.of(context).colorScheme.primary,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         shape: RoundedRectangleBorder(
@@ -213,110 +216,6 @@ class TransitionButton extends StatelessWidget {
   }
 }
 
-/// Audio visualizer that displays thin bars that scale from the center
-class LocalAudioVisualizer extends StatefulWidget {
-  final AudioTrack? audioTrack;
-  final Color color;
-
-  const LocalAudioVisualizer({
-    super.key,
-    required this.audioTrack,
-    this.color = Colors.white,
-  });
-
-  @override
-  State<LocalAudioVisualizer> createState() => _LocalAudioVisualizerState();
-}
-
-class _LocalAudioVisualizerState extends State<LocalAudioVisualizer> {
-  static const int sampleCount = 5;
-  List<double> samples =
-      List.filled(sampleCount, 0.05); // Minimum scale of 0.05
-
-  AudioVisualizer? _visualizer;
-  EventsListener<AudioVisualizerEvent>? _listener;
-
-  void _startVisualizer(AudioTrack? track) async {
-    if (track == null) {
-      return;
-    }
-
-    setState(() {
-      samples = List.filled(sampleCount, 0.05);
-    });
-
-    _visualizer ??= createVisualizer(track,
-        options: const AudioVisualizerOptions(barCount: sampleCount));
-    _listener ??= _visualizer?.createListener();
-    _listener?.on<AudioVisualizerEvent>((e) {
-      if (mounted) {
-        setState(() {
-          samples = e.event
-              .take(sampleCount)
-              .map((e) => ((e as num).toDouble() * 2).clamp(0.05, 1.0))
-              .toList();
-          while (samples.length < sampleCount) {
-            samples.add(0.05);
-          }
-        });
-      }
-    });
-
-    await _visualizer!.start();
-  }
-
-  void _stopVisualizer() async {
-    await _visualizer?.stop();
-    await _visualizer?.dispose();
-    _visualizer = null;
-    await _listener?.dispose();
-    _listener = null;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _startVisualizer(widget.audioTrack);
-  }
-
-  @override
-  void dispose() {
-    _stopVisualizer();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      // Add a SizedBox to constrain the size
-      height: 44, // Provide a reasonable height
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: List.generate(
-            sampleCount,
-            (index) => Padding(
-              padding: EdgeInsets.only(right: index < sampleCount - 1 ? 3 : 8),
-              child: Transform.scale(
-                scaleY: index < samples.length
-                    ? samples[index]
-                    : 0.05, // Safely access samples
-                alignment: Alignment.center,
-                child: Container(
-                  width: 2,
-                  height: 36, // Set a fixed height for the base bar
-                  color: widget.color,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 /// Audio controls shown when connected
 class AudioControls extends StatelessWidget {
   const AudioControls({super.key});
@@ -324,39 +223,35 @@ class AudioControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<RoomContext>(
-      builder: (context, roomContext, _) {
-        final isMicEnabled = roomContext.isMicrophoneEnabled ?? false;
-        final micTrack = roomContext.localParticipant
-            ?.getTrackPublicationBySource(TrackSource.microphone)
-            ?.track as AudioTrack?;
-
-        return Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          padding: const EdgeInsets.only(right: 12),
-          child: Row(
+      builder: (context, roomContext, _) => MediaDeviceContextBuilder(
+        builder: (context, roomCtx, mediaDeviceCtx) {
+          return Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              IconButton(
-                icon: Icon(
-                  isMicEnabled ? Icons.mic : Icons.mic_off,
-                  color: Theme.of(context).colorScheme.primary,
+              MicrophoneSelectButton(
+                selectedColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                selectedOverlayColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                iconColor: Theme.of(context).colorScheme.primary,
+                titleWidget: ParticipantSelector(
+                  filter: (identifier) =>
+                      identifier.isAudio && identifier.isLocal,
+                  builder: (context, identifier) {
+                    return AudioVisualizerWidget(
+                      options: AudioVisualizerWidgetOptions(
+                        width: 3,
+                        spacing: 3,
+                        minHeight: 3,
+                        maxHeight: 32,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    );
+                  },
                 ),
-                onPressed: () {
-                  roomContext.localParticipant
-                      ?.setMicrophoneEnabled(!isMicEnabled);
-                },
-              ),
-              LocalAudioVisualizer(
-                audioTrack: micTrack,
-                color: Theme.of(context).colorScheme.primary,
               ),
             ],
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:livekit_client/livekit_client.dart';
-import 'package:livekit_components/livekit_components.dart'
-    hide ParticipantKind;
-import 'package:provider/provider.dart';
+import 'package:livekit_components/livekit_components.dart';
 
 /// Shows a visualizer for the agent participant in the room
 /// This widget:
@@ -22,60 +19,19 @@ class StatusWidget extends StatefulWidget {
 class _StatusWidgetState extends State<StatusWidget> {
   @override
   Widget build(BuildContext context) {
-    return Consumer<RoomContext>(
-      builder: (context, roomContext, child) {
-        // Find the agent participant in the room
-        // LiveKit supports different participant types (agent/client/subscriber)
-        // We only care about the agent participant here
-        return ChangeNotifierProvider.value(
-          value: roomContext.room.remoteParticipants.values
-              .where((p) => p.kind == ParticipantKind.AGENT)
-              .firstOrNull,
-          child: Consumer<RemoteParticipant?>(
-            builder: (context, agentParticipant, child) {
-              // If no agent participant yet, show nothing
-              if (agentParticipant == null) {
-                return const SizedBox.shrink();
-              }
-
-              // Listen to the agent's metadata attributes
-              // These include the agent's state (speaking/thinking/listening)
-              return ChangeNotifierProvider(
-                create: (context) => ParticipantContext(agentParticipant),
-                child: ParticipantAttributes(
-                  builder: (context, attributes) {
-                    // Get the agent's state from their metadata
-                    // LiveKit uses a 'lk.agent.state' attribute to track this
-                    final agentState = AgentState.fromString(
-                        attributes?['lk.agent.state'] ?? 'initializing');
-
-                    // Get the agent's audio track for visualization
-                    final audioTrack = agentParticipant.audioTrackPublications
-                        .firstOrNull?.track as AudioTrack?;
-
-                    // If no audio track yet, show nothing
-                    if (audioTrack == null) {
-                      return const SizedBox.shrink();
-                    }
-
-                    // Show the waveform with opacity based on agent state
-                    return _AnimatedOpacityWidget(
-                      agentState: agentState,
-                      child: SoundWaveformWidget(
-                        audioTrack: audioTrack,
-                        options: AudioVisualizerWidgetOptions(
-                          width: 32,
-                          minHeight: 32,
-                          maxHeight: 256,
-                          color: Theme.of(context).colorScheme.primary,
-                          barCount: 7,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              );
-            },
+    return ParticipantSelector(
+      filter: (identifier) => identifier.isAudio && !identifier.isLocal,
+      builder: (context, identifier) {
+        return SizedBox(
+          height: 320,
+          child: AudioVisualizerWidget(
+            noTrackWidget: const SizedBox.shrink(),
+            options: AudioVisualizerWidgetOptions(
+              width: 32,
+              minHeight: 32,
+              maxHeight: 320,
+              color: Theme.of(context).colorScheme.primary,
+            ),
           ),
         );
       },

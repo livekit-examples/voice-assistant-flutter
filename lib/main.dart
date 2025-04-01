@@ -75,17 +75,28 @@ class _VoiceAssistantState extends State<VoiceAssistant> {
               mainAxisAlignment: MainAxisAlignment.center,
               spacing: 24,
               children: [
-                // Status widget shows the agent's audio visualization
-                ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    maxWidth: 512,
-                    minHeight: 256,
-                    maxHeight: 256,
+                Expanded(
+                  flex: 4,
+                  child: TranscriptionBuilder(
+                    builder: (context, roomCtx, transcriptions) {
+                      return TranscriptionWidget(
+                        textColor: Colors.white,
+                        backgroundColor: Colors.transparent,
+                        transcriptions: transcriptions,
+                      );
+                    },
                   ),
-                  child: const StatusWidget(),
+                ),
+                // Status widget shows the agent's audio visualization
+                const Expanded(
+                  flex: 1,
+                  child: StatusWidget(),
                 ),
                 // Control bar handles room connection and audio controls
-                const ControlBar(),
+                const Expanded(
+                  flex: 1,
+                  child: const ControlBar(),
+                ),
               ],
             ),
           ),
