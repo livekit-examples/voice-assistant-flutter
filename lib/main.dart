@@ -95,7 +95,7 @@ class _VoiceAssistantState extends State<VoiceAssistant> {
                 // Control bar handles room connection and audio controls
                 const Expanded(
                   flex: 1,
-                  child: const ControlBar(),
+                  child: ControlBar(),
                 ),
               ],
             ),
