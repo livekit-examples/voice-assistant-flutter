@@ -20,7 +20,7 @@ class _StatusWidgetState extends State<StatusWidget> {
   @override
   Widget build(BuildContext context) {
     return ParticipantSelector(
-      filter: (identifier) => identifier.isAudio && !identifier.isLocal,
+      filter: (identifier) => identifier.isAudio && identifier.isAgent,
       builder: (context, identifier) {
         return SizedBox(
           height: 320,

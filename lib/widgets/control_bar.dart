@@ -29,10 +29,6 @@ class _ControlBarState extends State<ControlBar> {
   bool isConnecting = false;
   bool isDisconnecting = false;
 
-  final url = 'ws://localhost:7880';
-  final token =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDQ4NDM4ODAsImlzcyI6IkFQSXJramtRYVZRSjVERSIsIm5hbWUiOiJmbHQiLCJuYmYiOjE3NDMwNDM4ODAsInN1YiI6ImZsdCIsInZpZGVvIjp7ImNhblVwZGF0ZU93bk1ldGFkYXRhIjp0cnVlLCJyb29tIjoibGl2ZSIsInJvb21Kb2luIjp0cnVlfX0.pLiGaft3Yjh0DZ_8HdlbKQkV0RyWxwFLtQbDl9cJtfg';
-
   // Helper to determine the current UI configuration based on connection state
   Configuration get currentConfiguration {
     if (isConnecting || isDisconnecting) {
@@ -82,8 +78,8 @@ class _ControlBarState extends State<ControlBar> {
 
       // Connect to the LiveKit room
       await roomContext.connect(
-        url: url, //connectionDetails.serverUrl,
-        token: token, //connectionDetails.participantToken,
+        url: connectionDetails.serverUrl,
+        token: connectionDetails.participantToken,
       );
 
       // Enable the microphone after connecting
@@ -117,8 +113,6 @@ class _ControlBarState extends State<ControlBar> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Spacer(),
-
         // Show different buttons based on connection state
         Builder(builder: (context) {
           switch (currentConfiguration) {
@@ -127,9 +121,9 @@ class _ControlBarState extends State<ControlBar> {
 
             case Configuration.connected:
               return Row(
+                spacing: 16,
                 children: [
                   const AudioControls(),
-                  const SizedBox(width: 16),
                   DisconnectButton(onPressed: disconnect),
                 ],
               );
@@ -138,8 +132,6 @@ class _ControlBarState extends State<ControlBar> {
               return TransitionButton(isConnecting: isConnecting);
           }
         }),
-
-        const Spacer(),
       ],
     );
   }
@@ -201,7 +193,8 @@ class TransitionButton extends StatelessWidget {
     return TextButton(
       onPressed: null, // Disabled during transition
       style: TextButton.styleFrom(
-        backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+        backgroundColor:
+            Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
         foregroundColor: Theme.of(context).colorScheme.primary,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         shape: RoundedRectangleBorder(
@@ -226,11 +219,16 @@ class AudioControls extends StatelessWidget {
       builder: (context, roomContext, _) => MediaDeviceContextBuilder(
         builder: (context, roomCtx, mediaDeviceCtx) {
           return Row(
-            mainAxisSize: MainAxisSize.min,
             children: [
               MicrophoneSelectButton(
-                selectedColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                selectedOverlayColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                selectedColor: Theme.of(context)
+                    .colorScheme
+                    .primary
+                    .withValues(alpha: 0.1),
+                selectedOverlayColor: Theme.of(context)
+                    .colorScheme
+                    .primary
+                    .withValues(alpha: 0.1),
                 iconColor: Theme.of(context).colorScheme.primary,
                 titleWidget: ParticipantSelector(
                   filter: (identifier) =>
