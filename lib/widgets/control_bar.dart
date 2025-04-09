@@ -28,7 +28,6 @@ class _ControlBarState extends State<ControlBar> {
   // Track connection state transitions
   bool isConnecting = false;
   bool isDisconnecting = false;
-
   // Helper to determine the current UI configuration based on connection state
   Configuration get currentConfiguration {
     if (isConnecting || isDisconnecting) {
@@ -218,35 +217,38 @@ class AudioControls extends StatelessWidget {
     return Consumer<RoomContext>(
       builder: (context, roomContext, _) => MediaDeviceContextBuilder(
         builder: (context, roomCtx, mediaDeviceCtx) {
-          return Row(
-            children: [
-              MicrophoneSelectButton(
-                selectedColor: Theme.of(context)
-                    .colorScheme
-                    .primary
-                    .withValues(alpha: 0.1),
-                selectedOverlayColor: Theme.of(context)
-                    .colorScheme
-                    .primary
-                    .withValues(alpha: 0.1),
-                iconColor: Theme.of(context).colorScheme.primary,
-                titleWidget: ParticipantSelector(
-                  filter: (identifier) =>
-                      identifier.isAudio && identifier.isLocal,
-                  builder: (context, identifier) {
-                    return AudioVisualizerWidget(
-                      options: AudioVisualizerWidgetOptions(
-                        width: 3,
-                        spacing: 3,
-                        minHeight: 3,
-                        maxHeight: 32,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    );
-                  },
+          return SizedBox(
+            height: 42,
+            child: Row(
+              children: [
+                MicrophoneSelectButton(
+                  selectedColor: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: 0.1),
+                  selectedOverlayColor: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: 0.1),
+                  iconColor: Theme.of(context).colorScheme.primary,
+                  titleWidget: ParticipantSelector(
+                    filter: (identifier) =>
+                        identifier.isAudio && identifier.isLocal,
+                    builder: (context, identifier) {
+                      return AudioVisualizerWidget(
+                        options: AudioVisualizerWidgetOptions(
+                          width: 3,
+                          spacing: 3,
+                          minHeight: 3,
+                          maxHeight: 32,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           );
         },
       ),

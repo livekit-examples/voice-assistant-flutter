@@ -18,18 +18,27 @@ import 'package:livekit_client/livekit_client.dart' show LocalParticipant;
 
 import 'package:livekit_components/livekit_components.dart';
 
-class TranscriptionWidget extends StatelessWidget {
-  TranscriptionWidget({
+class TranscriptionWidget extends StatefulWidget {
+  const TranscriptionWidget({
     super.key,
     required this.transcriptions,
     this.backgroundColor = Colors.white,
-    this.textColor = Colors.black,
+    this.textColor = Colors.white,
   });
-
   final Color backgroundColor;
   final Color textColor;
   final List<TranscriptionForParticipant> transcriptions;
+  @override
+  State<TranscriptionWidget> createState() => _TranscriptionWidgetState();
+}
+
+class _TranscriptionWidgetState extends State<TranscriptionWidget> {
   final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   List<Widget> _buildMessages(
       context, List<TranscriptionForParticipant> transcriptions) {
@@ -47,11 +56,11 @@ class TranscriptionWidget extends StatelessWidget {
             leading: Text(
               participant.identity,
               style: TextStyle(
-                color: textColor,
+                color: widget.textColor,
               ),
             ),
             text: segment.text + (segment.isFinal ? '' : '...'),
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+            color: widget.textColor,
             tail: true,
             isSender: true,
           ),
@@ -59,11 +68,14 @@ class TranscriptionWidget extends StatelessWidget {
       } else {
         msgWidgets.add(Row(
           children: [
-            Text(
-              segment.text + (segment.isFinal ? '' : '...'),
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.primary,
-                fontSize: 18,
+            SizedBox(
+              width: 320,
+              child: Text(
+                segment.text + (segment.isFinal ? '' : '...'),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontSize: 18,
+                ),
               ),
             ),
           ],
@@ -73,11 +85,6 @@ class TranscriptionWidget extends StatelessWidget {
     return msgWidgets;
   }
 
-  void scrollToBottom() {
-    _scrollController.animateTo(_scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -85,8 +92,9 @@ class TranscriptionWidget extends StatelessWidget {
         Expanded(
           child: SingleChildScrollView(
             controller: _scrollController,
+            reverse: true,
             child: Column(
-              children: _buildMessages(context, transcriptions),
+              children: _buildMessages(context, widget.transcriptions),
             ),
           ),
         ),

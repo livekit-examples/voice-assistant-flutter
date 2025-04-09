@@ -6,7 +6,7 @@ import 'package:livekit_components/livekit_components.dart'
 import 'package:provider/provider.dart';
 import './widgets/control_bar.dart';
 import './services/token_service.dart';
-import './widgets/status.dart';
+import 'widgets/agent_status.dart';
 import 'widgets/transcription_widget.dart';
 
 // Load environment variables before starting the app
@@ -80,11 +80,11 @@ class _VoiceAssistantState extends State<VoiceAssistant> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Expanded(
-                  flex: 4,
+                  flex: 6,
                   child: TranscriptionBuilder(
                     builder: (context, roomCtx, transcriptions) {
                       return TranscriptionWidget(
-                        textColor: Colors.white,
+                        textColor: Theme.of(context).colorScheme.primary,
                         backgroundColor: Colors.transparent,
                         transcriptions: transcriptions,
                       );
@@ -93,12 +93,12 @@ class _VoiceAssistantState extends State<VoiceAssistant> {
                 ),
                 // Status widget shows the agent's audio visualization
                 const Expanded(
-                  flex: 1,
-                  child: StatusWidget(),
+                  flex: 3,
+                  child: AgentStatusWidget(),
                 ),
                 // Control bar handles room connection and audio controls
                 const Expanded(
-                  flex: 1,
+                  flex: 3,
                   child: ControlBar(),
                 ),
               ],
