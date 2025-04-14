@@ -21,7 +21,7 @@ class _AgentStatusWidgetState extends State<AgentStatusWidget> {
   Widget build(BuildContext context) {
     return ParticipantSelector(
       filter: (identifier) =>
-          identifier.isAudio && !identifier.isLocal && identifier.isAgent,
+          identifier.isAudio && !identifier.isLocal /*&& identifier.isAgent*/,
       builder: (context, identifier) {
         return SizedBox(
           height: 320,

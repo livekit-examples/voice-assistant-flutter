@@ -85,7 +85,10 @@ class _VoiceAssistantState extends State<VoiceAssistant> {
                     builder: (context, roomCtx, transcriptions) {
                       return TranscriptionWidget(
                         textColor: Theme.of(context).colorScheme.primary,
-                        backgroundColor: Colors.transparent,
+                        backgroundColor: Theme.of(context)
+                            .colorScheme
+                            .primary
+                            .withValues(alpha: 0.1),
                         transcriptions: transcriptions,
                       );
                     },

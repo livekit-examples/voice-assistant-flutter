@@ -53,14 +53,12 @@ class _TranscriptionWidgetState extends State<TranscriptionWidget> {
       if (participant is LocalParticipant) {
         msgWidgets.add(
           BubbleNormal(
-            leading: Text(
-              participant.identity,
-              style: TextStyle(
-                color: widget.textColor,
-              ),
-            ),
             text: segment.text + (segment.isFinal ? '' : '...'),
-            color: widget.textColor,
+            textStyle: TextStyle(
+              color: widget.textColor,
+              fontSize: 18,
+            ),
+            color: widget.backgroundColor,
             tail: true,
             isSender: true,
           ),
