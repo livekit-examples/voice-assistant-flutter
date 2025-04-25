@@ -4,7 +4,7 @@
 
 This is a starter template for [LiveKit Agents](https://docs.livekit.io/agents/overview/) that provides a simple voice interface using the [LiveKit Flutter SDK](https://github.com/livekit/client-sdk-flutter).
 
-This template is compatible with iOS, macOS, and Android and is free for you to use or modify as you see fit.
+This template is compatible with iOS, macOS, Android, and web. It is free for you to use or modify as you see fit.
 
 <img src="./.github/assets/screenshot.png" alt="Voice Assistant Screenshot" height="500">
 
