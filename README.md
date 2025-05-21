@@ -1,42 +1,140 @@
-<img src="./.github/assets/app-icon.png" alt="Voice assistant app icon" width="100" height="100">
+# ON: Project Setup & Configuration Guide
 
-# Flutter Voice Assistant
+## 1. Installation Dependencies
 
-This is a starter template for [LiveKit Agents](https://docs.livekit.io/agents/overview/) that provides a simple voice interface using the [LiveKit Flutter SDK](https://github.com/livekit/client-sdk-flutter).
+Ensure you have the following dependencies listed in your `pubspec.yaml` file. If not, add them:
 
-This template is compatible with iOS, macOS, Android, and web. It is free for you to use or modify as you see fit.
-
-<img src="./.github/assets/screenshot.png" alt="Voice Assistant Screenshot" height="500">
-
-## Getting started
-
-The easiest way to get this app running is with the [Sandbox for LiveKit Cloud](https://cloud.livekit.io/projects/p_/sandbox) and the [LiveKit CLI](https://docs.livekit.io/home/cli/cli-setup/).
-
-First, create a new [Sandbox Token Server](https://cloud.livekit.io/projects/p_mytc7vpzfkt/sandbox/templates/token-server) for your LiveKit Cloud project.
-
-Then, run the following command to automatically clone this template and connect it to LiveKit Cloud.
-
-```bash
-lk app create --template voice-assistant-flutter --sandbox <token_server_sandbox_id>
+```yaml
+dependencies:
+  flutter:
+    sdk: flutter
+  google_fonts: ^3.0.1
+  ui_glass_effect: ^1.0.0
+  livekit_components: ^1.2.1
+  cupertino_icons: ^1.0.8
+  chat_bubbles: ^1.6.0
+  livekit_client: ^2.4.3
+  flutter_dotenv: ^5.0.2
+  http: ^1.3.0
+  provider: ^6.1.2
 ```
 
-Install dependencies and run the app:
-```bash
-flutter pub get
-flutter run
+After adding the dependencies, run `flutter pub get` in your terminal.
+
+## 2. Update README.md
+
+Replace the entire content of your existing `README.md` with this guide. This will serve as the new README for the project.
+
+## 3. Create .env.example File
+
+Create a new file named `.env.example` in the root directory of your project. This file will serve as a template for the required environment variables.
+
+Add the following content to `.env.example`:
+
+```
+LIVEKIT_URL=your_livekit_server_url
+LIVEKIT_API_KEY=your_livekit_api_key
+LIVEKIT_API_SECRET=your_livekit_api_secret
+AZURE_SPEECH_KEY=your_azure_speech_key
+AZURE_SPEECH_REGION=your_azure_region
+# The following is mentioned for the backend agent, but good to have a placeholder
+OPENAI_API_KEY=your_openai_api_key
+DEEPGRAM_API_KEY=your_deepgram_api_key
+# For token_service.dart (LiveKit Cloud sandbox)
+LIVEKIT_SANDBOX_ID=your_sandbox_id
 ```
 
-Note: You may need to configure signing certificates in Xcode if building to a real iOS device.
+**Important:** After creating `.env.example`, each developer should create their own `.env` file by copying `.env.example` and replacing the placeholder values with their actual credentials. **Do not commit the `.env` file to version control.** Ensure `.env` is listed in your `.gitignore` file.
 
-You'll also need an agent to speak with. Try our sample voice assistant agent for [Python](https://github.com/livekit-examples/voice-pipeline-agent-python), [Node.js](https://github.com/livekit-examples/voice-pipeline-agent-node), or [create your own from scratch](https://docs.livekit.io/agents/quickstart/).
+## 4. Local Development Setup
 
-> [!NOTE]
-> To setup without the LiveKit CLI, clone the repository and then either create a `.env` with a `LIVEKIT_SANDBOX_ID` (if using a [Sandbox Token Server](https://cloud.livekit.io/projects/p_/sandbox/templates/token-server)), or open `token_service.dart` and add your [manually generated](#token-generation) URL and token.
+Follow these steps to set up the ON application for local development:
 
-## Token generation
+1.  **Install Flutter:** If you haven't already, install Flutter by following the official Flutter installation guide for your operating system.
+2.  **Clone the Repository:**
+    ```bash
+    git clone <repository_url>
+    cd <repository_name>
+    ```
+3.  **Configure Environment Variables:**
+    *   Create a `.env` file by copying `.env.example`.
+    *   Update the `.env` file with your specific LiveKit and Azure credentials.
+        *   `LIVEKIT_URL`: Your LiveKit server URL.
+        *   `LIVEKIT_API_KEY`: Your LiveKit API key.
+        *   `LIVEKIT_API_SECRET`: Your LiveKit API secret.
+        *   `AZURE_SPEECH_KEY`: Your Azure Speech API key.
+        *   `AZURE_SPEECH_REGION`: Your Azure Speech region (e.g., `eastus`).
+        *   `OPENAI_API_KEY`: (If applicable for backend agent) Your OpenAI API key.
+        *   `DEEPGRAM_API_KEY`: (If applicable for alternative STT/TTS) Your Deepgram API key.
+        *   `LIVEKIT_SANDBOX_ID`: (If using LiveKit Cloud sandbox for `token_service.dart`) Your LiveKit Cloud sandbox ID.
+4.  **Get Dependencies:**
+    ```bash
+    flutter pub get
+    ```
+5.  **Run the Application:**
+    ```bash
+    flutter run
+    ```
+    This command will launch the application on your connected device or emulator.
 
-In a production environment, you will be responsible for developing a solution to [generate tokens for your users](https://docs.livekit.io/home/server/generating-tokens/) which is integrated with your authentication solution. You should disable your sandbox token server and modify `token_service.dart` to use your own token server.
+## 5. Project Structure Overview
 
-## Contributing
+```
+odelle_nyse/
+├── .env                 # Local environment variables (DO NOT COMMIT)
+├── .env.example         # Example environment variables
+├── .gitignore           # Specifies intentionally untracked files that Git should ignore
+├── README.md            # Project setup and information guide
+├── android/             # Android specific files
+├── assets/              # Contains .env for loading, ensure .env is listed here if you load it directly
+│   └── .env             # (Alternative placement, ensure .gitignore is correct)
+├── ios/                 # iOS specific files
+├── lib/
+│   ├── config.dart      # Handles loading of environment variables
+│   ├── main.dart        # Main application entry point
+│   ├── services/
+│   │   ├── llm_service.dart # Logic for interacting with LLM (e.g., OpenAI, local models)
+│   │   ├── stt_service.dart # Speech-to-Text service (e.g., Azure, Deepgram)
+│   │   ├── tts_service.dart # Text-to-Speech service (e.g., Azure, local models)
+│   │   └── token_service.dart # Generates LiveKit tokens (requires LIVEKIT_API_KEY, LIVEKIT_API_SECRET, and potentially LIVEKIT_SANDBOX_ID)
+│   ├── models/          # Data models (e.g., chat message, user profile)
+│   ├── widgets/         # Reusable UI components
+│   └── screens/         # Main application screens/pages
+├── pubspec.lock         # Automatically generated by Flutter, records specific versions of dependencies
+├── pubspec.yaml         # Project metadata and dependencies
+└── test/                # Unit and widget tests
+```
 
-This template is open source and we welcome contributions! Please open a PR or issue through GitHub, and don't forget to join us in the [LiveKit Community Slack](https://livekit.io/join-slack)!
+## 6. Key Configuration Points in Code
+
+*   **`lib/config.dart`**: This file is responsible for loading your environment variables from the `.env` file. Ensure it correctly loads all necessary keys (e.g., `LIVEKIT_URL`, `AZURE_SPEECH_KEY`).
+*   **`lib/services/token_service.dart`**: This service generates authentication tokens for LiveKit.
+    *   It requires `LIVEKIT_API_KEY` and `LIVEKIT_API_SECRET`.
+    *   If you are using the LiveKit Cloud sandbox example for token generation, it will also require `LIVEKIT_SANDBOX_ID`.
+    *   **Security Note:** In a production environment, token generation should ideally be handled by a secure backend server, not directly within the client application. The current setup is for development and demonstration purposes.
+*   **`lib/services/stt_service.dart` & `lib/services/tts_service.dart`**: These services will use `AZURE_SPEECH_KEY` and `AZURE_SPEECH_REGION` for Azure-based STT/TTS. If you switch to Deepgram or another service, you'll need to update the respective API keys and service logic.
+*   **`assets/` directory in `pubspec.yaml`**: Ensure that if you are loading the `.env` file as an asset (e.g., `await dotenv.load(fileName: ".env");`), it is correctly listed in the `assets` section of your `pubspec.yaml`:
+    ```yaml
+    flutter:
+      uses-material-design: true
+      assets:
+        - .env # Or assets/.env if you place it there
+    ```
+
+## 7. Troubleshooting Common Issues
+
+*   **"Environment variable not found" error:**
+    *   Verify your `.env` file exists in the root directory (or the path specified in `lib/config.dart`).
+    *   Ensure the variable names in your `.env` file match exactly with what's expected in the code (e.g., `LIVEKIT_URL`, not `livekit_url`).
+    *   Make sure you have run `flutter pub get` after any changes to `pubspec.yaml` or when first cloning the project.
+    *   If loading `.env` as an asset, confirm it's listed in `pubspec.yaml` under `assets:`.
+*   **LiveKit Connection Issues:**
+    *   Double-check `LIVEKIT_URL`, `LIVEKIT_API_KEY`, and `LIVEKIT_API_SECRET` in your `.env` file.
+    *   Ensure your LiveKit server is running and accessible.
+    *   If using `token_service.dart` with the sandbox, verify `LIVEKIT_SANDBOX_ID`.
+*   **Azure STT/TTS Issues:**
+    *   Confirm `AZURE_SPEECH_KEY` and `AZURE_SPEECH_REGION` are correct.
+    *   Check Azure service status and your subscription quotas.
+
+By following this guide, you should be able to set up and configure the ON project for local development and understand the key configuration areas.
+```

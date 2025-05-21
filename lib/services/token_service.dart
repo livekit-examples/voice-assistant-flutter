@@ -32,22 +32,29 @@ class ConnectionDetails {
 ///
 /// To use the LiveKit Cloud sandbox (development only)
 /// - Enable your sandbox here https://cloud.livekit.io/projects/p_/sandbox/templates/token-server
-/// - Create .env file with your LIVEKIT_SANDBOX_ID
+/// - Create .env file with `LIVEKIT_SANDBOX_ID=your_sandbox_id`
 ///
-/// To use a hardcoded token (development only)
-/// - Generate a token: https://docs.livekit.io/home/cli/cli-setup/#generate-access-token
-/// - Set `hardcodedServerUrl` and `hardcodedToken` below
+/// To use a direct LiveKit server URL and a pre-generated token (development or specific use cases)
+/// - Set `LIVEKIT_URL=your_livekit_server_url` in your .env file.
+/// - Set `LIVEKIT_CLIENT_TOKEN=your_generated_client_token` in your .env file.
+///   (Generate a token using the LiveKit CLI: https://docs.livekit.io/home/cli/cli-setup/#generate-access-token)
+///   Note: `LIVEKIT_API_KEY` and `LIVEKIT_API_SECRET` are server-side keys for token generation and should not be used directly as client tokens here.
 ///
-/// To use your own server (production applications)
-/// - Add a token endpoint to your server with a LiveKit Server SDK https://docs.livekit.io/home/server/generating-tokens/
-/// - Modify or replace this class as needed to connect to your new token server
-/// - Rejoice in your new production-ready LiveKit application!
+/// To use your own token server (production applications)
+/// - Add a token endpoint to your server using a LiveKit Server SDK: https://docs.livekit.io/home/server/generating-tokens/
+/// - Modify this class or implement a new one to fetch tokens from your server.
 ///
-/// See https://docs.livekit.io/home/get-started/authentication for more information
+/// See https://docs.livekit.io/home/get-started/authentication for more information.
 class TokenService extends ChangeNotifier {
-  // For hardcoded token usage (development only)
-  final String? hardcodedServerUrl = null;
-  final String? hardcodedToken = null;
+  // For direct URL/token usage, fetched from .env
+  // These will be used if LIVEKIT_SANDBOX_ID is not set or its method fails.
+  final String? hardcodedServerUrl = dotenv.env['LIVEKIT_URL']?.replaceAll('"', '');
+  // IMPORTANT: Ensure LIVEKIT_CLIENT_TOKEN in .env stores a client-side token.
+  // LIVEKIT_API_KEY is a server-side key and typically not used directly on the client.
+  // If you intend to use LIVEKIT_API_KEY from .env as a *client token*, this is technically possible but not standard.
+  // It's better to generate a specific client token and store it as LIVEKIT_CLIENT_TOKEN.
+  final String? hardcodedToken = dotenv.env['LIVEKIT_CLIENT_TOKEN'] ?? dotenv.env['LIVEKIT_API_KEY'];
+
 
   // Get the sandbox ID from environment variables
   String? get sandboxId {

@@ -1,5 +1,5 @@
-name: voice_assistant
-description: "A sample AI Voice Assistant app built on LiveKit Agents"
+name: odelle_nyse
+description: "A CBT-focused personal assistant built with Flutter and LiveKit, designed to help users self-actualize by understanding the spirit within them. ON works to elevate conscious awareness through the integration of cognitive behavioral therapy and spiritual practices."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -31,13 +31,15 @@ dependencies:
   flutter:
     sdk: flutter
   livekit_components: ^1.2.1
+  google_fonts: ^3.0.1
+  ui_glass_effect: ^1.0.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   chat_bubbles: ^1.6.0
   livekit_client: ^2.4.3
-  flutter_dotenv: ^5.2.1
+  flutter_dotenv: ^5.0.2
   http: ^1.3.0
   provider: ^6.1.2
 
