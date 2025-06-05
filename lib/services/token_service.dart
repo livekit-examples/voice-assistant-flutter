@@ -1,7 +1,8 @@
 import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
 
 /// Data class representing the connection details needed to join a LiveKit room
 /// This includes the server URL, room name, participant info, and auth token
@@ -44,7 +45,7 @@ class ConnectionDetails {
 /// - Rejoice in your new production-ready LiveKit application!
 ///
 /// See https://docs.livekit.io/home/get-started/authentication for more information
-class TokenService extends ChangeNotifier {
+class TokenService  {
   // For hardcoded token usage (development only)
   final String? hardcodedServerUrl = null;
   final String? hardcodedToken = null;
@@ -65,7 +66,7 @@ class TokenService extends ChangeNotifier {
 
   /// Main method to get connection details
   /// First tries hardcoded credentials, then falls back to sandbox
-  Future<ConnectionDetails?> fetchConnectionDetails({
+  Future<ConnectionDetails> fetchConnectionDetails({
     required String roomName,
     required String participantName,
   }) async {
@@ -84,12 +85,12 @@ class TokenService extends ChangeNotifier {
     );
   }
 
-  Future<ConnectionDetails?> fetchConnectionDetailsFromSandbox({
+  Future<ConnectionDetails> fetchConnectionDetailsFromSandbox({
     required String roomName,
     required String participantName,
   }) async {
     if (sandboxId == null) {
-      return null;
+      throw Exception('Sandbox ID is not set');
     }
 
     final uri = Uri.parse(sandboxUrl).replace(queryParameters: {
@@ -110,16 +111,16 @@ class TokenService extends ChangeNotifier {
         } catch (e) {
           debugPrint(
               'Error parsing connection details from LiveKit Cloud sandbox, response: ${response.body}');
-          return null;
+          throw Exception('Error parsing connection details from LiveKit Cloud sandbox');
         }
       } else {
         debugPrint(
             'Error from LiveKit Cloud sandbox: ${response.statusCode}, response: ${response.body}');
-        return null;
+        throw Exception('Error from LiveKit Cloud sandbox');
       }
     } catch (e) {
       debugPrint('Failed to connect to LiveKit Cloud sandbox: $e');
-      return null;
+      throw Exception('Failed to connect to LiveKit Cloud sandbox');
     }
   }
 
