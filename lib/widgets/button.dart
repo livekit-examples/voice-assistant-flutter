@@ -15,10 +15,13 @@ class Button extends StatelessWidget {
 
   @override
   Widget build(BuildContext ctx) => TextButton(
-        onPressed: onPressed,
+        onPressed: isProgressing ? null : onPressed,
         style: TextButton.styleFrom(
           backgroundColor: Theme.of(ctx).buttonTheme.colorScheme?.surface,
-          foregroundColor: Theme.of(ctx).colorScheme.primary,
+          foregroundColor: Colors.white,
+          // surfaceTintColor: Colors.white,
+          disabledForegroundColor: Colors.white,
+          // disabledIconColor: Colors.white,
           padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
@@ -28,7 +31,10 @@ class Button extends StatelessWidget {
           spacing: 15,
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (isProgressing) const CircularProgressIndicator.adaptive(),
+            if (isProgressing)
+              const CircularProgressIndicator.adaptive(
+                valueColor: AlwaysStoppedAnimation(Colors.white),
+              ),
             Text(
               text.toUpperCase(),
               style: const TextStyle(fontWeight: FontWeight.bold),
@@ -37,4 +43,3 @@ class Button extends StatelessWidget {
         ),
       );
 }
-

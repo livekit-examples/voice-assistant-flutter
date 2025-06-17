@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'controllers/app_ctrl.dart';
-import 'screens/agent_screen.dart' show AgentScreen;
-import 'ui/color_pallette.dart' show LKColorPaletteLight, LKColorPaletteDark;
 
+import 'controllers/app_ctrl.dart';
+import 'screens/agent_screen.dart';
 import 'screens/welcome_screen.dart';
+import 'ui/color_pallette.dart' show LKColorPaletteLight, LKColorPaletteDark;
+import 'widgets/app_layout_switcher.dart';
 
 final appCtrl = AppCtrl();
 
@@ -16,7 +17,16 @@ class VoiceAssistantApp extends StatelessWidget {
 
     return ThemeData(
       useMaterial3: true,
+      cardColor: colorPallete.bg2,
+      inputDecorationTheme: InputDecorationTheme(
+        fillColor: colorPallete.bg2,
+        hintStyle: TextStyle(
+          color: colorPallete.fg4,
+          fontSize: 14,
+        ),
+      ),
       buttonTheme: ButtonThemeData(
+        disabledColor: Colors.red,
         colorScheme: ColorScheme.dark(
           primary: Colors.white,
           secondary: Colors.white,
@@ -53,17 +63,16 @@ class VoiceAssistantApp extends StatelessWidget {
           title: 'Voice Assistant',
           theme: buildTheme(isLight: true),
           darkTheme: buildTheme(isLight: false),
-          themeMode: ThemeMode.dark,
+          // themeMode: ThemeMode.dark,
           home: Builder(
-            builder: (ctx) {
-              final appCtrl = ctx.watch<AppCtrl>();
-              switch (appCtrl.screen) {
-                case AppScreen.welcome:
-                  return const WelcomeScreen();
-                case AppScreen.agent:
-                  return const AgentScreen();
-              }
-            },
+            builder: (ctx) => Selector<AppCtrl, AppScreenState>(
+              selector: (ctx, appCtx) => appCtx.appScreenState,
+              builder: (ctx, screen, _) => AppLayoutSwitcher(
+                frontBuilder: (ctx) => const WelcomeScreen(),
+                backBuilder: (ctx) => const AgentScreen(),
+                isFront: screen == AppScreenState.welcome,
+              ),
+            ),
           ),
         ),
       );
