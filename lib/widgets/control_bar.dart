@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_sficon/flutter_sficon.dart' as sf;
 import 'package:livekit_components/livekit_components.dart' as components;
 import 'package:provider/provider.dart';
 
+import '../app.dart';
 import '../controllers/app_ctrl.dart' show AppCtrl, AgentScreenState;
 import '../ui/color_pallette.dart' show LKColorPaletteLight;
 import 'floating_glass.dart';
@@ -24,7 +26,9 @@ class ControlBar extends StatelessWidget {
                 fit: FlexFit.tight,
                 child: components.MediaDeviceContextBuilder(
                   builder: (context, roomCtx, mediaDeviceCtx) => FloatingGlassButton(
-                    icon: mediaDeviceCtx.microphoneOpened ? Icons.mic : Icons.mic_off,
+                    sfIcon: mediaDeviceCtx.microphoneOpened
+                        ? sf.SFIcons.sf_microphone_fill
+                        : sf.SFIcons.sf_microphone_slash_fill,
                     subWidget: components.ParticipantSelector(
                       filter: (identifier) => identifier.isAudio && identifier.isLocal,
                       builder: (context, identifier) => const SizedBox(
@@ -47,26 +51,24 @@ class ControlBar extends StatelessWidget {
                   ),
                 ),
               ),
-               Flexible(
+              Flexible(
                 flex: 1,
                 fit: FlexFit.tight,
                 child: components.MediaDeviceContextBuilder(
                   builder: (context, roomCtx, mediaDeviceCtx) => FloatingGlassButton(
-                    icon: mediaDeviceCtx.cameraOpened ? Icons.videocam : Icons.videocam_off,
-                    onTap: () {
-                      mediaDeviceCtx.cameraOpened
-                          ? mediaDeviceCtx.disableCamera()
-                          : mediaDeviceCtx.enableCamera();
-                    },
+                    sfIcon: mediaDeviceCtx.cameraOpened ? sf.SFIcons.sf_video_fill : sf.SFIcons.sf_video_slash_fill,
+                    onTap: () => appCtrl.toggleUserCamera(mediaDeviceCtx),
                   ),
                 ),
               ),
-              const Flexible(
+              Flexible(
                 flex: 1,
                 fit: FlexFit.tight,
                 child: FloatingGlassButton(
-                  icon: Icons.arrow_circle_up,
-                  // onTap: () {},
+                  sfIcon: sf.SFIcons.sf_arrow_up_square_fill,
+                  onTap: () {
+                    appCtrl.toggleScreenShare();
+                  },
                 ),
               ),
               Selector<AppCtrl, AgentScreenState>(
@@ -76,7 +78,7 @@ class ControlBar extends StatelessWidget {
                   fit: FlexFit.tight,
                   child: FloatingGlassButton(
                     isActive: agentScreenState == AgentScreenState.transcription,
-                    icon: Icons.message,
+                    sfIcon: sf.SFIcons.sf_ellipsis_message_fill,
                     onTap: () => ctx.read<AppCtrl>().toggleAgentScreenMode(),
                   ),
                 ),
@@ -86,7 +88,7 @@ class ControlBar extends StatelessWidget {
                 fit: FlexFit.tight,
                 child: FloatingGlassButton(
                   iconColor: LKColorPaletteLight().fgModerate,
-                  icon: Icons.phone_sharp,
+                  sfIcon: sf.SFIcons.sf_phone_down_fill,
                   onTap: () => ctx.read<AppCtrl>().disconnect(),
                 ),
               ),
