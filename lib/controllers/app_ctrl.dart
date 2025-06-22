@@ -19,6 +19,10 @@ class AppCtrl extends ChangeNotifier {
   ConnectionState connectionState = ConnectionState.disconnected;
   AgentScreenState agentScreenState = AgentScreenState.visualizer;
 
+  //Test
+  bool isUserCameEnabled = false;
+  bool isScreenshareEnabled = false;
+
   final messageCtrl = TextEditingController();
   final messageFocusNode = FocusNode();
 
@@ -61,6 +65,17 @@ class AppCtrl extends ChangeNotifier {
     roomContext.insertTranscription(components.TranscriptionForParticipant(segment, lp));
 
     await lp.sendText(text, options: sdk.SendTextOptions(topic: 'lk.chat'));
+  }
+
+  void toggleUserCamera(components.MediaDeviceContext? deviceCtx) {
+    isUserCameEnabled = !isUserCameEnabled;
+    isUserCameEnabled ? deviceCtx?.enableCamera() : deviceCtx?.disableCamera();
+    notifyListeners();
+  }
+
+  void toggleScreenShare() {
+    isScreenshareEnabled = !isScreenshareEnabled;
+    notifyListeners();
   }
 
   void toggleAgentScreenMode() {
@@ -113,7 +128,7 @@ class AppCtrl extends ChangeNotifier {
 
   void disconnect() {
     room.disconnect();
-    
+
     // Update states
     connectionState = ConnectionState.disconnected;
     appScreenState = AppScreenState.welcome;

@@ -1,37 +1,130 @@
 import 'dart:math' show max;
 
 import 'package:flutter/material.dart';
-import 'package:livekit_client/livekit_client.dart' as sdk;
-import 'package:livekit_components/livekit_components.dart' as components;
-import 'package:provider/provider.dart';
-import 'package:shimmer/shimmer.dart' as shimmer;
 
-import '../exts.dart';
-import '../support/agent_selector.dart';
-import 'camera_toggle_button.dart';
 import 'control_bar.dart';
 
+@immutable
+class AgentLayoutState {
+  final bool isTranscriptionVisible;
+  final bool isCameraVisible;
+  final bool isScreenshareVisible;
+
+  const AgentLayoutState({
+    this.isTranscriptionVisible = false,
+    this.isCameraVisible = false,
+    this.isScreenshareVisible = false,
+  });
+}
+
+extension AgentLayoutStateCopyExt on AgentLayoutState {
+  AgentLayoutState copyWith({
+    bool? isTranscriptionVisible,
+    bool? isCameraVisible,
+    bool? isScreenshareVisible,
+  }) {
+    return AgentLayoutState(
+      isTranscriptionVisible: isTranscriptionVisible ?? this.isTranscriptionVisible,
+      isCameraVisible: isCameraVisible ?? this.isCameraVisible,
+      isScreenshareVisible: isScreenshareVisible ?? this.isScreenshareVisible,
+    );
+  }
+}
+
+@immutable
+class LayoutPosition {
+  final double left;
+  final double top;
+  final double right;
+  final double bottom;
+
+  const LayoutPosition({
+    this.left = 0.0,
+    this.top = 0.0,
+    this.right = 0.0,
+    this.bottom = 0.0,
+  });
+}
+
 class AgentLayoutSwitcher extends StatelessWidget {
-  final bool isFullVisualizer;
-  //
+  final AgentLayoutState layoutState;
+
   final Widget Function(BuildContext ctx) transcriptionsBuilder;
-  final Widget Function(BuildContext ctx) agentViewBuilder;
+  final Widget Function(BuildContext ctx) buildAgentView;
+  final Widget Function(BuildContext ctx) buildCameraView;
+  final Widget Function(BuildContext ctx) buildScreenShareView;
 
   final Duration animationDuration;
   final Curve animationCurve;
 
   const AgentLayoutSwitcher({
     super.key,
-    this.isFullVisualizer = true,
-    this.animationDuration = const Duration(milliseconds: 300),
-    this.animationCurve = Curves.easeOutSine,
+    required this.layoutState,
+    // this.isFullVisualizer = true,
+    // this.isCamViewEnabled = false,
+    // this.isScreenShareViewEnabled = false,
+    this.animationDuration = const Duration(milliseconds: 500),
+    this.animationCurve = Curves.easeInOutSine,
     required this.transcriptionsBuilder,
-    required this.agentViewBuilder,
+    required this.buildAgentView,
+    required this.buildCameraView,
+    required this.buildScreenShareView,
   });
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
-        builder: (ctx, constraints) => Stack(
+  Widget build(BuildContext context) => LayoutBuilder(builder: (ctx, constraints) {
+        // Compute positions...
+        const double horizontalPadding = 10;
+        const double cellSpacing = 5;
+
+        final double topPadding = MediaQuery.of(ctx).viewPadding.top;
+        final double bottomPadding = 90 + MediaQuery.of(ctx).viewPadding.bottom;
+
+        final double singleCellWidth = constraints.maxWidth * 0.3;
+        final double singleCellHeight = constraints.maxHeight * 0.2;
+
+        print('Cell width: $singleCellWidth x $singleCellHeight');
+
+        final double cellBottom = (constraints.maxHeight - singleCellHeight - topPadding);
+
+        int cellCountCamAndScreen = 0;
+        if (layoutState.isCameraVisible) cellCountCamAndScreen += 1;
+        if (layoutState.isScreenshareVisible) cellCountCamAndScreen += 1;
+
+        int cellCountCam = 0;
+        if (layoutState.isCameraVisible) cellCountCam += 1;
+
+        final agentViewPosition = LayoutPosition(
+          left: layoutState.isTranscriptionVisible ? horizontalPadding : 0.0,
+          top: layoutState.isTranscriptionVisible ? topPadding : 0.0,
+          right: layoutState.isTranscriptionVisible
+              ? (singleCellWidth * cellCountCamAndScreen) + (cellSpacing * cellCountCamAndScreen) + horizontalPadding
+              : 0.0,
+          bottom: layoutState.isTranscriptionVisible ? cellBottom : 0.0,
+        );
+
+        final cameraViewPosition = LayoutPosition(
+          left: constraints.maxWidth - singleCellWidth - horizontalPadding,
+          top: layoutState.isTranscriptionVisible
+              ? topPadding
+              : constraints.maxHeight - (singleCellHeight + bottomPadding),
+          right: horizontalPadding,
+          bottom: layoutState.isTranscriptionVisible ? cellBottom : bottomPadding,
+        );
+
+        final screenshareViewPosition = LayoutPosition(
+          left: constraints.maxWidth -
+              (singleCellWidth * (cellCountCam + 1)) -
+              (cellSpacing * cellCountCam) -
+              horizontalPadding,
+          top: layoutState.isTranscriptionVisible
+              ? topPadding
+              : constraints.maxHeight - (singleCellHeight + bottomPadding),
+          right: ((singleCellWidth + cellSpacing) * cellCountCam) + horizontalPadding,
+          bottom: layoutState.isTranscriptionVisible ? cellBottom : bottomPadding,
+        );
+
+        return Stack(
           children: [
             Positioned.fill(
               child: Padding(
@@ -39,22 +132,60 @@ class AgentLayoutSwitcher extends StatelessWidget {
                 child: transcriptionsBuilder(context),
               ),
             ),
+            // Overlay for transcriptions
             Positioned.fill(
-              child: AnimatedPadding(
-                curve: animationCurve,
-                duration: animationDuration,
-                padding: EdgeInsets.only(
-                  top: isFullVisualizer ? 0.0 : MediaQuery.of(ctx).viewPadding.top,
-                  bottom: isFullVisualizer ? 0.0 : (constraints.maxHeight * 0.7),
-                ),
-                child: Container(
-                  decoration: const BoxDecoration(
-                    color: Colors.black,
+              child: IgnorePointer(
+                child: AnimatedOpacity(
+                  opacity: layoutState.isTranscriptionVisible ? 0.0 : 1.0,
+                  duration: animationDuration,
+                  curve: animationCurve,
+                  child: Container(
+                    color: Theme.of(ctx).canvasColor,
                   ),
-                  child: agentViewBuilder(ctx),
                 ),
               ),
             ),
+            // AgentView
+            AnimatedPositioned(
+              duration: animationDuration,
+              curve: animationCurve,
+              left: agentViewPosition.left,
+              top: agentViewPosition.top,
+              right: agentViewPosition.right,
+              bottom: agentViewPosition.bottom,
+              child: buildAgentView(ctx),
+            ),
+            // CameraView
+            AnimatedPositioned(
+              duration: animationDuration,
+              curve: animationCurve,
+              left: cameraViewPosition.left,
+              top: cameraViewPosition.top,
+              right: cameraViewPosition.right,
+              bottom: cameraViewPosition.bottom,
+              child: AnimatedOpacity(
+                opacity: layoutState.isCameraVisible ? 1.0 : 0.0,
+                duration: animationDuration,
+                curve: animationCurve,
+                child: buildCameraView(ctx),
+              ),
+            ),
+            // ScreenshareView
+            AnimatedPositioned(
+              duration: animationDuration,
+              curve: animationCurve,
+              left: screenshareViewPosition.left,
+              top: screenshareViewPosition.top,
+              right: screenshareViewPosition.right,
+              bottom: screenshareViewPosition.bottom,
+              child: AnimatedOpacity(
+                opacity: layoutState.isScreenshareVisible ? 1.0 : 0.0,
+                duration: animationDuration,
+                curve: animationCurve,
+                child: buildScreenShareView(ctx),
+              ),
+            ),
+            // Control bar
             Positioned(
               left: 0,
               right: 0,
@@ -65,75 +196,10 @@ class AgentLayoutSwitcher extends StatelessWidget {
                   right: 20,
                   bottom: max(20, MediaQuery.of(ctx).viewPadding.bottom),
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  spacing: 20,
-                  children: [
-                    IgnorePointer(
-                      ignoring: !isFullVisualizer,
-                      child: Container(
-                        alignment: Alignment.bottomRight,
-                        child: components.MediaDeviceContextBuilder(
-                          builder: (context, roomCtx, mediaDeviceCtx) => AnimatedOpacity(
-                            opacity: (mediaDeviceCtx.cameraOpened && isFullVisualizer) ? 1.0 : 0.0,
-                            duration: animationDuration,
-                            curve: animationCurve,
-                            child: Container(
-                              height: 180,
-                              width: 120,
-                              clipBehavior: Clip.hardEdge,
-                              decoration: BoxDecoration(borderRadius: BorderRadius.circular(15)),
-                              child: components.ParticipantSelector(
-                                filter: (identifier) => identifier.isVideo && identifier.isLocal,
-                                builder: (context, identifier) => Stack(
-                                  children: [
-                                    const components.VideoTrackWidget(
-                                      fit: sdk.VideoViewFit.cover,
-                                    ),
-                                    Positioned(
-                                      right: 10,
-                                      bottom: 10,
-                                      child: CameraToggleButton(
-                                        onTap: () => mediaDeviceCtx.toggleCameraPosition(),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    IgnorePointer(
-                      ignoring: true,
-                      child: AgentParticipantSelector(
-                        builder: (ctx, agentParticipant) => Selector<components.ParticipantContext?, bool>(
-                          selector: (ctx, agentCtx) =>
-                              agentCtx?.agentState == components.AgentState.initializing ||
-                              agentCtx?.agentState == components.AgentState.listening,
-                          builder: (ctx, isListening, child) => AnimatedOpacity(
-                            opacity: isFullVisualizer && isListening ? 1.0 : 0.0,
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeOutSine,
-                            child: shimmer.Shimmer.fromColors(
-                              baseColor: Colors.white.withOpacity(0.2),
-                              highlightColor: Colors.white,
-                              child: const Text(
-                                "Agent is listening, start talking",
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const ControlBar(),
-                  ],
-                ),
+                child: const ControlBar(),
               ),
             ),
           ],
-        ),
-      );
+        );
+      });
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_sficon/flutter_sficon.dart' as sf;
 
 import '../ui/color_pallette.dart';
 
@@ -18,15 +19,18 @@ class MessageBarButton extends StatelessWidget {
           color: isEnabled ? Theme.of(ctx).buttonTheme.colorScheme?.surface : LKColorPaletteDark().bg3,
           child: InkWell(
             onTap: isEnabled ? onTap : null,
-            child: const Padding(
-              padding: EdgeInsets.symmetric(
+            child: Container(
+              padding: const EdgeInsets.symmetric(
                 vertical: 10,
                 horizontal: 10,
               ),
-              child: Icon(
-                Icons.arrow_upward,
+              width: 40,
+              height: 40,
+              alignment: Alignment.center,
+              child: const sf.SFIcon(
+                sf.SFIcons.sf_arrow_up,
                 color: Colors.white,
-                size: 18,
+                fontSize: 16,
               ),
             ),
           ),
@@ -40,7 +44,7 @@ class MessageBar extends StatelessWidget {
   final GestureTapCallback? onSendTap;
   final bool isSendEnabled;
 
-   const MessageBar({
+  const MessageBar({
     super.key,
     this.controller,
     this.focusNode,

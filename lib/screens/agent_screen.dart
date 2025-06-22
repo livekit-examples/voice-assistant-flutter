@@ -1,14 +1,15 @@
 import 'dart:math' show max;
 
 import 'package:flutter/material.dart';
-import 'package:livekit_components/livekit_components.dart' as components;
 import 'package:livekit_client/livekit_client.dart' as sdk;
+import 'package:livekit_components/livekit_components.dart' as components;
 import 'package:provider/provider.dart';
 
 import '../controllers/app_ctrl.dart';
-import '../widgets/agent_layout_switcher.dart';
-import '../widgets/message_bar.dart';
 import '../support/agent_selector.dart';
+import '../widgets/agent_layout_switcher.dart';
+import '../widgets/camera_toggle_button.dart';
+import '../widgets/message_bar.dart';
 
 class AgentTrackView extends StatelessWidget {
   const AgentTrackView({super.key});
@@ -108,14 +109,48 @@ class AgentScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext ctx) => Material(
-        child: Selector<AppCtrl, AgentScreenState>(
-          selector: (ctx, appCtrl) => appCtrl.agentScreenState,
-          builder: (ctx, agentScreenState, child) => AgentLayoutSwitcher(
-            isFullVisualizer: agentScreenState == AgentScreenState.visualizer,
-            agentViewBuilder: (ctx) => 
-            // AgentTrackView(),
-            FrontView(
-              screenState: agentScreenState,
+        child: Selector<AppCtrl, AgentLayoutState>(
+          selector: (ctx, appCtrl) => AgentLayoutState(
+            isTranscriptionVisible: appCtrl.agentScreenState == AgentScreenState.transcription,
+            isCameraVisible: appCtrl.isUserCameEnabled,
+            isScreenshareVisible: appCtrl.isScreenshareEnabled,
+          ),
+          builder: (ctx, agentLayoutState, child) => AgentLayoutSwitcher(
+            layoutState: agentLayoutState,
+            // agentViewBuilder: (ctx) => AgentTrackView(),
+            buildAgentView: (ctx) => const AgentTrackView(),
+            buildCameraView: (ctx) => Container(
+              clipBehavior: Clip.hardEdge,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: components.MediaDeviceContextBuilder(
+                builder: (context, roomCtx, mediaDeviceCtx) => components.ParticipantSelector(
+                  filter: (identifier) => identifier.isVideo && identifier.isLocal,
+                  builder: (context, identifier) => Stack(
+                    children: [
+                      components.VideoTrackWidget(
+                        fit: sdk.VideoViewFit.cover,
+                        noTrackBuilder: (ctx) => Container(),
+                      ),
+                      Positioned(
+                        right: 10,
+                        bottom: 10,
+                        child: CameraToggleButton(
+                          onTap: () => mediaDeviceCtx.toggleCameraPosition(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            buildScreenShareView: (ctx) => Container(
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: Colors.green.withOpacity(0.3),
+              ),
+              child: const Text('Screenshare View'),
             ),
             transcriptionsBuilder: (ctx) => Column(
               mainAxisSize: MainAxisSize.max,

@@ -54,7 +54,7 @@ class FloatingGlassButton extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         type: MaterialType.transparency,
         child: Ink(
-          color: isActive ? Theme.of(ctx).cardColor.withOpacity(0.2) : null,
+          color: isActive ? Theme.of(ctx).cardColor : null,
           child: InkWell(
             onTap: onTap,
             child: Container(
