@@ -23,8 +23,8 @@ class AgentTrackView extends StatelessWidget {
             // Prioritize video track
             return videoTrack ?? audioTrack;
           },
-          builder: (ctx, mediaTrack, child) => ChangeNotifierProvider<components.TrackReferenceContext?>(
-            create: (context) =>
+          builder: (ctx, mediaTrack, child) => ChangeNotifierProvider<components.TrackReferenceContext?>.value(
+            value:
                 agentParticipant == null ? null : components.TrackReferenceContext(agentParticipant, pub: mediaTrack),
             child: Builder(
               builder: (ctx) => Container(
