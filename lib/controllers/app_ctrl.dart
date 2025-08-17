@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:livekit_client/livekit_client.dart' as sdk;
 import 'package:livekit_components/livekit_components.dart' as components;
+import 'package:logging/logging.dart';
 import 'package:uuid/uuid.dart';
 
 import '../services/token_service.dart';
@@ -34,6 +36,13 @@ class AppCtrl extends ChangeNotifier {
   bool isSendButtonEnabled = false;
 
   AppCtrl() {
+    final format = DateFormat('HH:mm:ss');
+    // configure logs for debugging
+    Logger.root.level = Level.FINE;
+    Logger.root.onRecord.listen((record) {
+      print('${format.format(record.time)}: ${record.message}');
+    });
+
     messageCtrl.addListener(() {
       final newValue = messageCtrl.text.isNotEmpty;
       if (newValue != isSendButtonEnabled) {
